@@ -8,6 +8,7 @@ export default function MagazzinoPage() {
   const [disposizioni, setDisposizioni] = useState<any[]>([]);
   const [foto, setFoto] = useState<FotoMagazzino[]>([]);
   const [fotoTab, setFotoTab] = useState<"tutte" | "approvate" | "in_attesa">("tutte");
+  const [searchTerm, setSearchTerm] = useState("");
   const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
 
   // ── Fetch ──
@@ -40,8 +41,23 @@ export default function MagazzinoPage() {
 
   // ── Derivati ──
   const fotoFiltrate = foto.filter((f) => {
-    if (fotoTab === "approvate") return f.stato === "approvato";
-    if (fotoTab === "in_attesa") return f.stato === "in_attesa";
+    if (fotoTab === "approvate" && f.stato !== "approvato") return false;
+    if (fotoTab === "in_attesa" && f.stato !== "in_attesa") return false;
+    
+    if (searchTerm) {
+      const s = searchTerm.toLowerCase();
+      const code = (f as any).disposizioni?.codice?.toLowerCase() || "";
+      const desc = f.descrizione?.toLowerCase() || "";
+      if (!code.includes(s) && !desc.includes(s)) return false;
+    }
+    return true;
+  });
+
+  const disposizioniFiltrate = disposizioni.filter(d => {
+    if (searchTerm) {
+      const s = searchTerm.toLowerCase();
+      return d.codice.toLowerCase().includes(s) || d.descrizione.toLowerCase().includes(s);
+    }
     return true;
   });
 
@@ -82,9 +98,21 @@ export default function MagazzinoPage() {
               Consulta le istruzioni attive e monitora le foto caricate tramite il Bot Telegram.
             </p>
           </div>
-          <div className="flex items-center gap-2 shrink-0 bg-white border border-slate-200 px-3 py-1.5 rounded-full shadow-sm">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="text-[10px] text-slate-600 font-bold uppercase tracking-widest">Live</span>
+          <div className="flex flex-col items-end gap-3 w-full sm:w-auto">
+            <div className="flex items-center gap-2 shrink-0 bg-white border border-slate-200 px-3 py-1.5 rounded-full shadow-sm self-end">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="text-[10px] text-slate-600 font-bold uppercase tracking-widest">Live</span>
+            </div>
+            <div className="relative w-full sm:w-64">
+              <input
+                type="text"
+                placeholder="Cerca codice o testo..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full bg-white border border-slate-200 focus:border-slate-400 rounded-xl pl-9 pr-4 py-2 text-xs text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400 transition-all shadow-sm"
+              />
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">🔍</span>
+            </div>
           </div>
         </header>
 
@@ -96,19 +124,18 @@ export default function MagazzinoPage() {
             <div className="flex items-center min-h-[40px]">
               <h2 className="text-xs font-bold text-slate-800 flex items-center gap-2 uppercase tracking-widest">
                 <span className="w-1.5 h-4 bg-slate-500 rounded-full inline-block" />
-                Disposizioni Attive ({disposizioni.length})
+                Disposizioni Attive ({disposizioniFiltrate.length})
               </h2>
             </div>
 
-            {disposizioni.length === 0 ? (
+            {disposizioniFiltrate.length === 0 ? (
               <div className="bg-white border border-slate-200 p-8 rounded-2xl shadow-sm text-center text-slate-450 font-sans leading-relaxed">
                 <span className="text-2xl block mb-1">📋</span>
-                Nessuna disposizione attiva al momento.
-                <p className="text-[10px] text-slate-400 mt-1">Le nuove istruzioni appariranno qui una volta approvate dal Preposto.</p>
+                Nessun risultato trovato.
               </div>
             ) : (
               <div className="space-y-3">
-                {disposizioni.map((d) => (
+                {disposizioniFiltrate.map((d) => (
                   <div
                     key={d.id}
                     className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm shadow-slate-100/40 space-y-3 hover:border-slate-300 transition-all duration-300"

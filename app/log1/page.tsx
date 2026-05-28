@@ -7,6 +7,7 @@ export default function Log1Dashboard() {
   const [disposizioni, setDisposizioni] = useState<any[]>([]);
   const [codice, setCodice] = useState("");
   const [descrizione, setDescrizione] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(false);
   const [submitError, setSubmitError] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
@@ -93,6 +94,11 @@ export default function Log1Dashboard() {
     approvato: disposizioni.filter((d) => d.stato === "approvato").length,
     rifiutato: disposizioni.filter((d) => d.stato === "rifiutato").length,
   };
+
+  const filteredDisposizioni = disposizioni.filter((d) =>
+    d.codice.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    d.descrizione.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <main className="min-h-screen bg-slate-50 text-slate-800 relative overflow-hidden pb-12">
@@ -202,18 +208,30 @@ export default function Log1Dashboard() {
 
           {/* ── STORICO (3/5) ────────────────────────────────────────────── */}
           <section className="lg:col-span-3 space-y-3">
-            <h2 className="text-xs font-bold text-slate-800 flex items-center gap-2 uppercase tracking-widest">
-              <span className="w-1.5 h-4 bg-slate-400 rounded-full inline-block" />
-              Storico ({disposizioni.length})
-            </h2>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+              <h2 className="text-xs font-bold text-slate-800 flex items-center gap-2 uppercase tracking-widest">
+                <span className="w-1.5 h-4 bg-slate-400 rounded-full inline-block" />
+                Storico ({disposizioni.length})
+              </h2>
+              <div className="relative w-full sm:w-64">
+                <input
+                  type="text"
+                  placeholder="Cerca codice o testo..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full bg-white border border-slate-200 focus:border-slate-400 rounded-xl pl-9 pr-4 py-2 text-xs text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400 transition-all"
+                />
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">🔍</span>
+              </div>
+            </div>
 
-            {disposizioni.length === 0 ? (
+            {filteredDisposizioni.length === 0 ? (
               <div className="bg-white border border-slate-200 p-12 rounded-2xl shadow-sm text-center text-slate-450 font-sans">
                 <span className="text-3xl block mb-2">📋</span>
-                Nessuna disposizione ancora creata.
+                Nessun risultato trovato.
               </div>
             ) : (
-              disposizioni.map((d) => {
+              filteredDisposizioni.map((d) => {
                 const s = statusStyle[d.stato] ?? statusStyle.in_attesa;
                 return (
                   <div
