@@ -106,7 +106,7 @@ export default function Home() {
                 </div>
               </div>
               <div className="flex items-center gap-2 text-xs text-slate-600 border border-slate-200 bg-slate-50 rounded-xl px-4 py-2 font-bold group-hover:bg-slate-850 group-hover:text-white group-hover:border-slate-850 transition-all shadow-sm">
-                ACCEDI PORTALE ➔
+                ACCEDI ➔
               </div>
             </Link>
 
@@ -114,7 +114,7 @@ export default function Home() {
             <Link 
               href="/magazzino"
               onMouseEnter={() => addHoverLog("Magazzino")}
-              className="group relative bg-white border border-slate-200 hover:border-slate-350 shadow-sm shadow-slate-100/40 hover:shadow-md transition-all duration-300 p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 cursor-pointer rounded-2xl md:ml-12"
+              className="group relative bg-white border border-slate-200 hover:border-slate-350 shadow-sm shadow-slate-100/40 hover:shadow-md transition-all duration-300 p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 cursor-pointer rounded-2xl"
             >
               <div className="flex items-start gap-4">
                 <div className="text-slate-300 text-3xl font-extrabold tracking-widest font-mono group-hover:text-slate-500 transition-colors">
@@ -122,15 +122,15 @@ export default function Home() {
                 </div>
                 <div>
                   <h3 className="text-xl font-bold text-slate-800 tracking-wide group-hover:text-slate-950 transition-colors">
-                    Magazzino Upload
+                    Magazzino Dashboard
                   </h3>
                   <p className="text-xs text-slate-500 mt-1 max-w-md font-sans">
-                    Interfaccia mobile-first per magazzinieri. Caricamento foto ed esecuzione delle disposizioni con integrazione fotocamera.
+                    Visualizzazione delle disposizioni in corso e storico fotografico. Caricamento foto gestito tramite bot Telegram.
                   </p>
                 </div>
               </div>
               <div className="flex items-center gap-2 text-xs text-slate-600 border border-slate-200 bg-slate-50 rounded-xl px-4 py-2 font-bold group-hover:bg-slate-850 group-hover:text-white group-hover:border-slate-850 transition-all shadow-sm">
-                APRI TELECAMERA ➔
+                ACCEDI ➔
               </div>
             </Link>
 
@@ -138,7 +138,7 @@ export default function Home() {
             <Link 
               href="/preposto"
               onMouseEnter={() => addHoverLog("Preposto")}
-              className="group relative bg-white border border-slate-200 hover:border-slate-350 shadow-sm shadow-slate-100/40 hover:shadow-md transition-all duration-300 p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 cursor-pointer rounded-2xl md:mr-12"
+              className="group relative bg-white border border-slate-200 hover:border-slate-350 shadow-sm shadow-slate-100/40 hover:shadow-md transition-all duration-300 p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 cursor-pointer rounded-2xl"
             >
               <div className="flex items-start gap-4">
                 <div className="text-slate-300 text-3xl font-extrabold tracking-widest font-mono group-hover:text-slate-500 transition-colors">
@@ -154,7 +154,7 @@ export default function Home() {
                 </div>
               </div>
               <div className="flex items-center gap-2 text-xs text-slate-600 border border-slate-200 bg-slate-50 rounded-xl px-4 py-2 font-bold group-hover:bg-slate-850 group-hover:text-white group-hover:border-slate-850 transition-all shadow-sm">
-                REGISTRO OPERATIVO ➔
+                ACCEDI ➔
               </div>
             </Link>
 
