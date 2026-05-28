@@ -59,6 +59,17 @@ export default function Log1Dashboard() {
     }
   };
 
+  const handleCancel = async (id: string) => {
+    if (!confirm("Sei sicuro di voler annullare questa disposizione?")) return;
+    try {
+      const res = await fetch(`/api/disposizioni/${id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Errore durante l'annullamento");
+      fetchDisposizioni();
+    } catch (err) {
+      alert("Impossibile annullare la disposizione");
+    }
+  };
+
   const statusStyle: Record<string, { bar: string; badge: string; label: string }> = {
     in_attesa: {
       bar: "bg-amber-400",
@@ -235,9 +246,19 @@ export default function Log1Dashboard() {
                           </p>
                         )}
                       </div>
-                      <span className={`shrink-0 text-[10px] font-bold px-3 py-1 border rounded-full ${s.badge} uppercase tracking-wider`}>
-                        {s.label}
-                      </span>
+                      <div className="flex flex-col items-end gap-2">
+                        <span className={`shrink-0 text-[10px] font-bold px-3 py-1 border rounded-full ${s.badge} uppercase tracking-wider`}>
+                          {s.label}
+                        </span>
+                        {d.stato === "in_attesa" && (
+                          <button
+                            onClick={() => handleCancel(d.id)}
+                            className="text-[10px] text-rose-500 hover:text-rose-700 underline font-bold uppercase tracking-widest mt-1 cursor-pointer"
+                          >
+                            Annulla
+                          </button>
+                        )}
+                      </div>
                     </div>
                   </div>
                 );
