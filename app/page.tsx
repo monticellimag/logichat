@@ -38,28 +38,28 @@ export default function Home() {
 
   if (!mounted) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center font-mono text-lime-400 text-sm">
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center font-mono text-slate-400 text-sm">
         LOADING CORE INTERFACE...
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#000000] text-zinc-100 font-mono relative overflow-hidden flex flex-col justify-between selection:bg-lime-400 selection:text-black">
-      {/* BACKGROUND DECORATIVE GRID (Subtle industrial lines, NO Aurora blobs!) */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#111_1px,transparent_1px),linear-gradient(to_bottom,#111_1px,transparent_1px)] bg-[size:4rem_4rem] pointer-events-none" />
-      <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-lime-500/20 to-transparent pointer-events-none" />
+    <div className="min-h-screen bg-slate-50 text-slate-800 relative overflow-hidden flex flex-col justify-between selection:bg-slate-800 selection:text-white">
+      {/* Soft industrial subtle background grid */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#e2e8f0_1px,transparent_1px),linear-gradient(to_bottom,#e2e8f0_1px,transparent_1px)] bg-[size:3rem_3rem] opacity-50 pointer-events-none" />
+      <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-slate-300 to-transparent pointer-events-none" />
 
       {/* TOP STATUS BAR */}
-      <header className="border-b border-zinc-800/80 bg-black/80 backdrop-blur-sm z-10 px-6 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 relative">
+      <header className="border-b border-slate-200 bg-white/80 backdrop-blur-sm z-10 px-6 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 relative shadow-sm">
         <div className="flex items-center gap-3">
-          <div className="w-2.5 h-2.5 bg-lime-400 rounded-none animate-pulse" />
-          <span className="text-white font-extrabold tracking-widest text-sm">LOGICHAT // SYS_v1.0</span>
+          <div className="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse" />
+          <span className="text-slate-900 font-extrabold tracking-widest text-sm">LOGICHAT // SYS_v1.0</span>
         </div>
-        <div className="flex items-center gap-6 text-xs text-zinc-500">
-          <div>DATABASE: <span className="text-lime-400">ONLINE</span></div>
-          <div>BOT GATEWAY: <span className="text-lime-400">READY</span></div>
-          <div className="font-mono text-zinc-400">{systemTime}</div>
+        <div className="flex items-center gap-6 text-xs text-slate-500">
+          <div>DATABASE: <span className="text-emerald-600 font-bold">ONLINE</span></div>
+          <div>BOT GATEWAY: <span className="text-emerald-600 font-bold">READY</span></div>
+          <div className="font-mono text-slate-400">{systemTime}</div>
         </div>
       </header>
 
@@ -68,14 +68,14 @@ export default function Home() {
         
         {/* ASYMMETRIC TYPOGRAPHIC HERO */}
         <section className="flex flex-col gap-4 text-left max-w-4xl">
-          <div className="text-xs font-bold text-lime-400 uppercase tracking-widest border-l-2 border-lime-400 pl-3">
+          <div className="text-xs font-bold text-slate-500 uppercase tracking-widest border-l-2 border-slate-450 pl-3">
             LOGISTICS & TELEGRAM SYNERGY SYSTEM
           </div>
-          <h1 className="text-4xl sm:text-6xl md:text-7xl font-black text-white leading-none tracking-tighter">
+          <h1 className="text-4xl sm:text-6xl md:text-7xl font-black text-slate-900 leading-none tracking-tight">
             LOGICHAT <br />
-            <span className="text-zinc-600 font-light">// CONTROL HIERARCHY</span>
+            <span className="text-slate-400 font-light">// CONTROL HIERARCHY</span>
           </h1>
-          <p className="text-sm text-zinc-400 max-w-xl leading-relaxed mt-2 font-sans">
+          <p className="text-sm text-slate-500 max-w-xl leading-relaxed mt-2 font-sans">
             Piattaforma industriale per lo smistamento delle disposizioni operative da LOG1, convalida immediata dei preposti via Telegram, e archiviazione fotografica illimitata per i magazzinieri.
           </p>
         </section>
@@ -83,117 +83,117 @@ export default function Home() {
         {/* ASYMMETRIC CONTROLS SECTION */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           
-          {/* PORTALS LIST (L-R staggered asymmetry, 8 cols) */}
+          {/* PORTALS LIST */}
           <div className="lg:col-span-8 flex flex-col gap-6">
             
-            {/* PORTAL 1: LOG1 (Wide, aligned left) */}
+            {/* PORTAL 1: LOG1 */}
             <Link 
               href="/log1"
               onMouseEnter={() => addHoverLog("LOG1")}
-              className="group relative bg-[#09090b] border border-zinc-800 hover:border-lime-500/80 transition-all duration-300 p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 cursor-pointer rounded-none"
+              className="group relative bg-white border border-slate-200 hover:border-slate-350 shadow-sm shadow-slate-100/40 hover:shadow-md transition-all duration-300 p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 cursor-pointer rounded-2xl"
             >
               <div className="flex items-start gap-4">
-                <div className="text-zinc-700 text-3xl font-extrabold tracking-widest font-mono group-hover:text-lime-400 transition-colors">
+                <div className="text-slate-300 text-3xl font-extrabold tracking-widest font-mono group-hover:text-slate-500 transition-colors">
                   01 //
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold text-white tracking-wide group-hover:text-lime-300 transition-colors">
+                  <h3 className="text-xl font-bold text-slate-800 tracking-wide group-hover:text-slate-950 transition-colors">
                     LOG1 Dashboard
                   </h3>
-                  <p className="text-xs text-zinc-500 mt-1 max-w-md font-sans">
+                  <p className="text-xs text-slate-500 mt-1 max-w-md font-sans">
                     Pannello di invio per disposizioni operative e monitoraggio in tempo reale delle foto caricate dai magazzinieri.
                   </p>
                 </div>
               </div>
-              <div className="flex items-center gap-2 text-xs text-lime-400 border border-lime-500/10 bg-lime-500/5 px-3 py-1 font-bold group-hover:bg-lime-400 group-hover:text-black transition-all">
+              <div className="flex items-center gap-2 text-xs text-slate-600 border border-slate-200 bg-slate-50 rounded-xl px-4 py-2 font-bold group-hover:bg-slate-850 group-hover:text-white group-hover:border-slate-850 transition-all shadow-sm">
                 ACCEDI PORTALE ➔
               </div>
             </Link>
 
-            {/* PORTAL 2: MAGAZZINO (Offset width or alignment, aligned right-ish) */}
+            {/* PORTAL 2: MAGAZZINO */}
             <Link 
               href="/magazzino"
               onMouseEnter={() => addHoverLog("Magazzino")}
-              className="group relative bg-[#09090b] border border-zinc-800 hover:border-lime-500/80 transition-all duration-300 p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 cursor-pointer rounded-none md:ml-12"
+              className="group relative bg-white border border-slate-200 hover:border-slate-350 shadow-sm shadow-slate-100/40 hover:shadow-md transition-all duration-300 p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 cursor-pointer rounded-2xl md:ml-12"
             >
               <div className="flex items-start gap-4">
-                <div className="text-zinc-700 text-3xl font-extrabold tracking-widest font-mono group-hover:text-lime-400 transition-colors">
+                <div className="text-slate-300 text-3xl font-extrabold tracking-widest font-mono group-hover:text-slate-500 transition-colors">
                   02 //
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold text-white tracking-wide group-hover:text-lime-300 transition-colors">
+                  <h3 className="text-xl font-bold text-slate-800 tracking-wide group-hover:text-slate-950 transition-colors">
                     Magazzino Upload
                   </h3>
-                  <p className="text-xs text-zinc-500 mt-1 max-w-md font-sans">
+                  <p className="text-xs text-slate-500 mt-1 max-w-md font-sans">
                     Interfaccia mobile-first per magazzinieri. Caricamento foto ed esecuzione delle disposizioni con integrazione fotocamera.
                   </p>
                 </div>
               </div>
-              <div className="flex items-center gap-2 text-xs text-lime-400 border border-lime-500/10 bg-lime-500/5 px-3 py-1 font-bold group-hover:bg-lime-400 group-hover:text-black transition-all">
+              <div className="flex items-center gap-2 text-xs text-slate-600 border border-slate-200 bg-slate-50 rounded-xl px-4 py-2 font-bold group-hover:bg-slate-850 group-hover:text-white group-hover:border-slate-850 transition-all shadow-sm">
                 APRI TELECAMERA ➔
               </div>
             </Link>
 
-            {/* PORTAL 3: PREPOSTO (Wide, offset left) */}
+            {/* PORTAL 3: PREPOSTO */}
             <Link 
               href="/preposto"
               onMouseEnter={() => addHoverLog("Preposto")}
-              className="group relative bg-[#09090b] border border-zinc-800 hover:border-lime-500/80 transition-all duration-300 p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 cursor-pointer rounded-none md:mr-12"
+              className="group relative bg-white border border-slate-200 hover:border-slate-350 shadow-sm shadow-slate-100/40 hover:shadow-md transition-all duration-300 p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 cursor-pointer rounded-2xl md:mr-12"
             >
               <div className="flex items-start gap-4">
-                <div className="text-zinc-700 text-3xl font-extrabold tracking-widest font-mono group-hover:text-lime-400 transition-colors">
+                <div className="text-slate-300 text-3xl font-extrabold tracking-widest font-mono group-hover:text-slate-500 transition-colors">
                   03 //
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold text-white tracking-wide group-hover:text-lime-300 transition-colors">
+                  <h3 className="text-xl font-bold text-slate-800 tracking-wide group-hover:text-slate-950 transition-colors">
                     Preposto Control Room
                   </h3>
-                  <p className="text-xs text-zinc-500 mt-1 max-w-md font-sans">
+                  <p className="text-xs text-slate-500 mt-1 max-w-md font-sans">
                     Log storico, statistiche di approvazione e registro di controllo attività svolte dai bot automatici.
                   </p>
                 </div>
               </div>
-              <div className="flex items-center gap-2 text-xs text-lime-400 border border-lime-500/10 bg-lime-500/5 px-3 py-1 font-bold group-hover:bg-lime-400 group-hover:text-black transition-all">
+              <div className="flex items-center gap-2 text-xs text-slate-600 border border-slate-200 bg-slate-50 rounded-xl px-4 py-2 font-bold group-hover:bg-slate-850 group-hover:text-white group-hover:border-slate-850 transition-all shadow-sm">
                 REGISTRO OPERATIVO ➔
               </div>
             </Link>
 
           </div>
 
-          {/* TELEMETRY / LIVE LOGS (Asymmetric right-hand side, 4 cols) */}
-          <div className="lg:col-span-4 bg-[#09090b] border border-zinc-800 p-6 rounded-none flex flex-col gap-6 relative">
-            <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
+          {/* TELEMETRY / LIVE LOGS */}
+          <div className="lg:col-span-4 bg-slate-900 border border-slate-800 text-slate-100 p-6 rounded-2xl flex flex-col gap-6 shadow-xl relative">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
               <span className="text-xs font-bold text-white tracking-wider flex items-center gap-2">
-                <span className="w-1.5 h-1.5 bg-lime-400 rounded-none animate-ping" />
+                <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-ping" />
                 SYSTEM TELEMETRY
               </span>
-              <span className="text-[10px] text-zinc-500 font-mono">LIVE FEED</span>
+              <span className="text-[10px] text-slate-500 font-mono">LIVE FEED</span>
             </div>
             
-            <div className="flex flex-col gap-3 font-mono text-[11px]">
+            <div className="flex flex-col gap-3 font-mono text-[11px] min-h-[100px]">
               {activeLogs.map((log, index) => (
-                <div key={index} className={`truncate ${index === 0 ? "text-lime-400" : "text-zinc-500"}`}>
+                <div key={index} className={`truncate ${index === 0 ? "text-emerald-400" : "text-slate-400"}`}>
                   {index === 0 ? "> " : "  "}{log}
                 </div>
               ))}
             </div>
 
-            <div className="border-t border-zinc-800 pt-4 flex flex-col gap-3">
-              <div className="flex justify-between text-xs text-zinc-500">
+            <div className="border-t border-slate-800 pt-4 flex flex-col gap-3">
+              <div className="flex justify-between text-xs text-slate-400">
                 <span>ACTIVE WEBHOOK:</span>
-                <span className="text-zinc-300 font-bold">/api/telegram/webhook</span>
+                <span className="text-slate-200 font-bold font-mono">/api/telegram/webhook</span>
               </div>
-              <div className="flex justify-between text-xs text-zinc-500">
+              <div className="flex justify-between text-xs text-slate-400">
                 <span>PHOTO STORAGE:</span>
-                <span className="text-zinc-300 font-bold">TELEGRAM ARCHIVE</span>
+                <span className="text-slate-200 font-bold">TELEGRAM ARCHIVE</span>
               </div>
-              <div className="flex justify-between text-xs text-zinc-500">
+              <div className="flex justify-between text-xs text-slate-400">
                 <span>DB PROVIDER:</span>
-                <span className="text-zinc-300 font-bold">SUPABASE CLOUD</span>
+                <span className="text-slate-200 font-bold">SUPABASE CLOUD</span>
               </div>
             </div>
 
-            <div className="bg-lime-950/20 border border-lime-500/10 p-4 text-[10px] text-lime-400/90 leading-relaxed font-sans">
+            <div className="bg-slate-850/60 border border-slate-800 p-4 rounded-xl text-[10px] text-slate-400 leading-relaxed font-sans">
               <strong>Nota Operativa:</strong> Le approvazioni in tempo reale richiedono l'abilitazione del Webhook. Assicurati che il bot Telegram sia stato avviato e le variabili d'ambiente inserite nel file <code>.env.local</code> siano valide.
             </div>
           </div>
@@ -203,16 +203,16 @@ export default function Home() {
       </main>
 
       {/* FOOTER */}
-      <footer className="border-t border-zinc-800/80 bg-black/60 z-10 px-6 py-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <span className="text-[10px] text-zinc-600 tracking-wider">
+      <footer className="border-t border-slate-200 bg-white/80 backdrop-blur-sm z-10 px-6 py-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 shadow-inner">
+        <span className="text-[10px] text-slate-400 tracking-wider">
           LOGICHAT PLATFORM // © {new Date().getFullYear()} // TUTTI I DIRITTI RISERVATI
         </span>
-        <div className="flex items-center gap-6 text-[10px] text-zinc-500">
-          <span className="hover:text-lime-400 transition-colors">SYS_STATUS: ACTIVE</span>
+        <div className="flex items-center gap-6 text-[10px] text-slate-450">
+          <span className="hover:text-slate-800 transition-colors">SYS_STATUS: ACTIVE</span>
           <span>|</span>
-          <span className="hover:text-lime-400 transition-colors">SECURITY: AES-256</span>
+          <span className="hover:text-slate-800 transition-colors">SECURITY: AES-256</span>
           <span>|</span>
-          <span className="hover:text-lime-400 transition-colors">API PROXIES: ENABLED</span>
+          <span className="hover:text-slate-800 transition-colors">API PROXIES: ENABLED</span>
         </div>
       </footer>
     </div>
