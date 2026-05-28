@@ -52,28 +52,28 @@ export default function PrepostoDashboard() {
   const pendingPhotos = allPhotos.filter((f) => f.stato === "in_attesa").length;
 
   return (
-    <main className="min-h-screen bg-[#000000] text-zinc-100 font-mono relative overflow-hidden p-6 md:p-12">
-      {/* BACKGROUND DECORATIVE GRID */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#111_1px,transparent_1px),linear-gradient(to_bottom,#111_1px,transparent_1px)] bg-[size:4rem_4rem] pointer-events-none" />
-      <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-lime-500/20 to-transparent pointer-events-none" />
+    <main className="min-h-screen bg-slate-50 text-slate-800 relative overflow-hidden p-6 md:p-12 pb-16">
+      {/* Soft industrial subtle background grid */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#e2e8f0_1px,transparent_1px),linear-gradient(to_bottom,#e2e8f0_1px,transparent_1px)] bg-[size:3rem_3rem] opacity-50 pointer-events-none" />
+      <div className="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-slate-350 to-transparent pointer-events-none" />
 
-      <header className="max-w-6xl mx-auto mb-10 flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-zinc-800 pb-6 relative z-10">
+      <header className="max-w-6xl mx-auto mb-10 flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-slate-200 pb-6 relative z-10">
         <div>
           <div className="flex items-center gap-3">
-            <Link href="/" className="text-zinc-500 hover:text-lime-400 transition-colors text-xs font-bold">
+            <Link href="/" className="text-slate-400 hover:text-slate-600 transition-colors text-xs font-bold">
               ← CONTROL HIERARCHY
             </Link>
           </div>
-          <h1 className="text-3xl font-black tracking-tighter text-white mt-2">
-            PREPOSTO // CONTROL ROOM
+          <h1 className="text-3xl font-black tracking-tight text-slate-900 mt-2">
+            PREPOSTO <span className="text-slate-300">//</span> CONTROL ROOM
           </h1>
-          <p className="text-zinc-400 mt-1 text-xs font-sans">
+          <p className="text-slate-500 mt-1 text-xs font-sans">
             Registro storico delle approvazioni e controllo attività sul Bot Telegram.
           </p>
         </div>
-        <div className="bg-zinc-900/80 border border-zinc-800 px-4 py-2.5 flex items-center gap-3">
-          <div className="w-2 h-2 bg-lime-400 animate-pulse rounded-none" />
-          <span className="text-[10px] font-bold text-lime-400 uppercase tracking-widest">
+        <div className="bg-white border border-slate-200 px-4 py-2 flex items-center gap-3 rounded-full shadow-sm">
+          <div className="w-2 h-2 bg-emerald-500 animate-pulse rounded-full" />
+          <span className="text-[10px] font-bold text-slate-600 uppercase tracking-widest">
             Audit Trail Attivo
           </span>
         </div>
@@ -81,21 +81,21 @@ export default function PrepostoDashboard() {
 
       {/* Stat Cards */}
       <section className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-4 mb-8 relative z-10">
-        <div className="bg-[#09090b] border border-zinc-800 p-4 rounded-none">
-          <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">Disposizioni Totali</p>
-          <p className="text-3xl font-bold mt-1 text-white">{totalDisp}</p>
+        <div className="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm shadow-slate-100/40">
+          <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Disposizioni Totali</p>
+          <p className="text-3xl font-black mt-1 text-slate-900">{totalDisp}</p>
         </div>
-        <div className="bg-[#09090b] border border-zinc-800 p-4 rounded-none">
-          <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">Disposizioni Approvate</p>
-          <p className="text-3xl font-bold mt-1 text-lime-400">{approvedDisp}</p>
+        <div className="bg-white border border-emerald-200 p-5 rounded-2xl shadow-sm shadow-slate-100/40">
+          <p className="text-[10px] text-emerald-700/70 font-bold uppercase tracking-widest">Disposizioni Approvate</p>
+          <p className="text-3xl font-black mt-1 text-emerald-600">{approvedDisp}</p>
         </div>
-        <div className="bg-[#09090b] border border-zinc-800 p-4 rounded-none">
-          <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">Foto Caricate</p>
-          <p className="text-3xl font-bold mt-1 text-white">{totalPhotos}</p>
+        <div className="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm shadow-slate-100/40">
+          <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Foto Caricate</p>
+          <p className="text-3xl font-black mt-1 text-slate-900">{totalPhotos}</p>
         </div>
-        <div className="bg-[#09090b] border border-zinc-800 p-4 rounded-none">
-          <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">Foto Approvate</p>
-          <p className="text-3xl font-bold mt-1 text-lime-400">{approvedPhotos}</p>
+        <div className="bg-white border border-emerald-200 p-5 rounded-2xl shadow-sm shadow-slate-100/40">
+          <p className="text-[10px] text-emerald-700/70 font-bold uppercase tracking-widest">Foto Approvate</p>
+          <p className="text-3xl font-black mt-1 text-emerald-600">{approvedPhotos}</p>
         </div>
       </section>
 
@@ -103,31 +103,31 @@ export default function PrepostoDashboard() {
       <div className="max-w-6xl mx-auto relative z-10">
         
         {/* Navigation Tabs */}
-        <div className="flex border-b border-zinc-800 mb-6 gap-6">
+        <div className="flex border-b border-slate-200 mb-6 gap-6 relative z-10">
           <button
             onClick={() => setActiveTab("disposizioni")}
             className={`pb-3 text-xs font-extrabold tracking-widest transition cursor-pointer relative uppercase ${
               activeTab === "disposizioni"
-                ? "text-lime-400"
-                : "text-zinc-500 hover:text-zinc-300"
+                ? "text-slate-800"
+                : "text-slate-400 hover:text-slate-650"
             }`}
           >
             Disposizioni ({pendingDisp} in attesa)
             {activeTab === "disposizioni" && (
-              <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-lime-400" />
+              <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-slate-800 rounded-full" />
             )}
           </button>
           <button
             onClick={() => setActiveTab("foto")}
             className={`pb-3 text-xs font-extrabold tracking-widest transition cursor-pointer relative uppercase ${
               activeTab === "foto"
-                ? "text-lime-400"
-                : "text-zinc-500 hover:text-zinc-300"
+                ? "text-slate-800"
+                : "text-slate-400 hover:text-slate-650"
             }`}
           >
             Foto Magazzino ({pendingPhotos} in attesa)
             {activeTab === "foto" && (
-              <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-lime-400" />
+              <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-slate-800 rounded-full" />
             )}
           </button>
         </div>
@@ -136,46 +136,46 @@ export default function PrepostoDashboard() {
         {activeTab === "disposizioni" ? (
           <div className="space-y-4">
             {disposizioni.length === 0 ? (
-              <p className="text-xs text-zinc-500 italic py-10 text-center font-sans">Nessuna disposizione nel log.</p>
+              <p className="text-xs text-slate-400 py-12 text-center font-sans bg-white border border-slate-200 rounded-2xl shadow-sm">Nessuna disposizione nel registro.</p>
             ) : (
               disposizioni.map((disp) => {
                 const statusStyles: Record<string, string> = {
-                  in_attesa: "bg-amber-500/5 border-amber-500/20 text-amber-400",
-                  approvato: "bg-lime-500/5 border-lime-500/20 text-lime-400",
-                  rifiutato: "bg-rose-500/5 border-rose-500/20 text-rose-400",
+                  in_attesa: "bg-amber-50 border-amber-250 text-amber-700 rounded-full",
+                  approvato: "bg-emerald-50 border-emerald-250 text-emerald-700 rounded-full",
+                  rifiutato: "bg-rose-50 border-rose-250 text-rose-700 rounded-full",
                 };
 
                 return (
                   <div
                     key={disp.id}
-                    className="bg-[#09090b] border border-zinc-800 rounded-none p-5 hover:border-lime-500/40 transition-all duration-300"
+                    className="bg-white border border-slate-200 rounded-2xl p-5 hover:border-slate-350 shadow-sm shadow-slate-100/40 transition-all duration-300"
                   >
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-3">
                       <div>
-                        <span className="font-mono text-xs text-lime-400 font-bold bg-lime-500/5 px-2.5 py-1 border border-lime-500/10 rounded-none">
+                        <span className="font-mono text-xs text-slate-700 font-bold bg-slate-100 px-2.5 py-1 border border-slate-200 rounded-lg">
                           {disp.codice}
                         </span>
-                        <span className="text-[10px] text-zinc-500 ml-3">
+                        <span className="text-[10px] text-slate-400 ml-3">
                           Creato il {new Date(disp.created_at).toLocaleString("it-IT")}
                         </span>
                       </div>
-                      <span className={`text-[10px] font-bold px-2.5 py-1 border rounded-none tracking-wider ${statusStyles[disp.stato]}`}>
+                      <span className={`text-[10px] font-bold px-2.5 py-1 border tracking-wider ${statusStyles[disp.stato]}`}>
                         {disp.stato === "in_attesa" && "⏳ In Attesa Telegram"}
                         {disp.stato === "approvato" && "✅ Approvato"}
                         {disp.stato === "rifiutato" && "❌ Rifiutato"}
                       </span>
                     </div>
 
-                    <p className="text-zinc-300 text-sm mb-3 leading-relaxed font-sans">{disp.descrizione}</p>
+                    <p className="text-slate-700 text-sm mb-3 leading-relaxed font-sans">{disp.descrizione}</p>
 
                     {disp.stato !== "in_attesa" && (
-                      <div className="text-[11px] text-zinc-400 bg-black border border-zinc-800/80 rounded-none px-4 py-2 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-6 mt-3">
+                      <div className="text-[11px] text-slate-500 bg-slate-50 border border-slate-100 px-4 py-2.5 rounded-xl flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-6 mt-3">
                         <div>
-                          👤 Gestito da: <strong className="text-zinc-200">{disp.approvato_da}</strong>
+                          👤 Gestito da: <strong className="text-slate-700">{disp.approvato_da}</strong>
                         </div>
-                        <div className="hidden sm:block text-zinc-800">|</div>
+                        <div className="hidden sm:block text-slate-200">|</div>
                         <div>
-                          📅 Decisione del: <strong className="text-zinc-200">{new Date(disp.decisione_data).toLocaleString("it-IT")}</strong>
+                          📅 Decisione del: <strong className="text-slate-700">{new Date(disp.decisione_data).toLocaleString("it-IT")}</strong>
                         </div>
                       </div>
                     )}
@@ -187,23 +187,23 @@ export default function PrepostoDashboard() {
         ) : (
           <div className="space-y-4">
             {allPhotos.length === 0 ? (
-              <p className="text-xs text-zinc-500 italic py-10 text-center font-sans">Nessuna foto nel log.</p>
+              <p className="text-xs text-slate-400 py-12 text-center font-sans bg-white border border-slate-200 rounded-2xl shadow-sm">Nessuna foto nel registro.</p>
             ) : (
               allPhotos.map((foto) => {
                 const statusStyles: Record<string, string> = {
-                  in_attesa: "bg-amber-500/5 border-amber-500/20 text-amber-400",
-                  approvato: "bg-lime-500/5 border-lime-500/20 text-lime-400",
-                  rifiutato: "bg-rose-500/5 border-rose-500/20 text-rose-400",
+                  in_attesa: "bg-amber-50 border-amber-250 text-amber-700 rounded-full",
+                  approvato: "bg-emerald-50 border-emerald-250 text-emerald-700 rounded-full",
+                  rifiutato: "bg-rose-50 border-rose-250 text-rose-700 rounded-full",
                 };
 
                 return (
                   <div
                     key={foto.id}
-                    className="bg-[#09090b] border border-zinc-800 rounded-none p-5 hover:border-lime-500/40 transition-all duration-300 flex flex-col md:flex-row gap-5"
+                    className="bg-white border border-slate-200 rounded-2xl p-5 hover:border-slate-350 shadow-sm shadow-slate-100/40 transition-all duration-300 flex flex-col md:flex-row gap-5"
                   >
                     {/* Immagine */}
                     <div
-                      className="w-full md:w-32 aspect-square relative rounded-none overflow-hidden bg-black border border-zinc-800 hover:border-lime-500/50 transition cursor-zoom-in flex-shrink-0"
+                      className="w-full md:w-32 aspect-square relative rounded-xl overflow-hidden bg-slate-50 border border-slate-200 hover:border-slate-450 transition cursor-zoom-in flex-shrink-0"
                       onClick={() => setSelectedPhoto(`/api/foto?file_id=${foto.telegram_file_id}`)}
                     >
                       {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -219,30 +219,30 @@ export default function PrepostoDashboard() {
                       <div>
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-2">
                           <div>
-                            <span className="font-mono text-[10px] uppercase font-bold text-zinc-400 bg-zinc-850 px-2 py-0.5 border border-zinc-700 rounded-none">
+                            <span className="font-mono text-[10px] uppercase font-bold text-slate-650 bg-slate-100 px-2.5 py-0.5 border border-slate-200 rounded-lg">
                               Disp: {foto.codiceDisposizione}
                             </span>
-                            <span className="text-[10px] text-zinc-500 ml-3">
+                            <span className="text-[10px] text-slate-400 ml-3">
                               Caricato il {new Date(foto.created_at).toLocaleString("it-IT")}
                             </span>
                           </div>
-                          <span className={`text-[10px] font-bold px-2.5 py-1 border rounded-none tracking-wider self-start sm:self-center ${statusStyles[foto.stato]}`}>
+                          <span className={`text-[10px] font-bold px-2.5 py-1 border tracking-wider self-start sm:self-center ${statusStyles[foto.stato]}`}>
                             {foto.stato === "in_attesa" && "⏳ In Attesa Telegram"}
                             {foto.stato === "approvato" && "✅ Foto Approvata"}
                             {foto.stato === "rifiutato" && "❌ Foto Rifiutata"}
                           </span>
                         </div>
-                        <p className="text-zinc-300 text-sm leading-relaxed mb-3 font-sans">{foto.descrizione}</p>
+                        <p className="text-slate-700 text-sm leading-relaxed mb-3 font-sans">{foto.descrizione}</p>
                       </div>
 
                       {foto.stato !== "in_attesa" && (
-                        <div className="text-[11px] text-zinc-400 bg-black border border-zinc-800/80 rounded-none px-4 py-2 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-6 mt-2">
+                        <div className="text-[11px] text-slate-500 bg-slate-50 border border-slate-100 px-4 py-2.5 rounded-xl flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-6 mt-2">
                           <div>
-                            👤 Approvato da: <strong className="text-zinc-200">{foto.decisione_da}</strong>
+                            👤 Approvato da: <strong className="text-slate-700">{foto.decisione_da}</strong>
                           </div>
-                          <div className="hidden sm:block text-zinc-850">|</div>
+                          <div className="hidden sm:block text-slate-200">|</div>
                           <div>
-                            📅 Data decisione: <strong className="text-zinc-200">{new Date(foto.decisione_data).toLocaleString("it-IT")}</strong>
+                            📅 Data decisione: <strong className="text-slate-700">{new Date(foto.decisione_data).toLocaleString("it-IT")}</strong>
                           </div>
                         </div>
                       )}
@@ -261,7 +261,10 @@ export default function PrepostoDashboard() {
           className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4 cursor-zoom-out"
           onClick={() => setSelectedPhoto(null)}
         >
-          <div className="max-w-4xl max-h-[85vh] relative rounded-none overflow-hidden border border-zinc-800 shadow-2xl">
+          <div
+            className="max-w-4xl max-h-[85vh] relative rounded-2xl overflow-hidden border border-slate-700 shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={selectedPhoto}
@@ -269,7 +272,7 @@ export default function PrepostoDashboard() {
               className="object-contain max-h-[80vh] w-full"
             />
             <button
-              className="absolute top-4 right-4 bg-black/80 hover:bg-zinc-900 text-white rounded-none w-9 h-9 flex items-center justify-center border border-zinc-800 transition cursor-pointer"
+              className="absolute top-4 right-4 bg-black/80 hover:bg-black text-white rounded-full w-8 h-8 flex items-center justify-center transition cursor-pointer text-sm"
               onClick={() => setSelectedPhoto(null)}
             >
               ✕

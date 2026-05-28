@@ -114,13 +114,13 @@ export default function MagazzinoPage() {
   });
 
   const statoBadge: Record<string, string> = {
-    in_attesa: "bg-amber-500/10 border-amber-500/40 text-amber-400",
-    approvato:  "bg-lime-500/10 border-lime-500/40 text-lime-400",
-    rifiutato:  "bg-rose-500/10 border-rose-500/40 text-rose-400",
+    in_attesa: "bg-amber-50 border-amber-250 text-amber-700",
+    approvato:  "bg-emerald-50 border-emerald-250 text-emerald-700",
+    rifiutato:  "bg-rose-50 border-rose-250 text-rose-700",
   };
   const statoBar: Record<string, string> = {
     in_attesa: "bg-amber-500",
-    approvato:  "bg-lime-500",
+    approvato:  "bg-emerald-500",
     rifiutato:  "bg-rose-500",
   };
   const statoLabel: Record<string, string> = {
@@ -130,51 +130,51 @@ export default function MagazzinoPage() {
   };
 
   return (
-    <main className="min-h-screen bg-[#000000] text-zinc-100 font-mono relative overflow-hidden">
-      {/* Grid bg */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#111_1px,transparent_1px),linear-gradient(to_bottom,#111_1px,transparent_1px)] bg-[size:4rem_4rem] pointer-events-none" />
-      <div className="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-lime-500/20 to-transparent pointer-events-none" />
+    <main className="min-h-screen bg-slate-50 text-slate-800 relative overflow-hidden pb-12">
+      {/* Soft industrial subtle background grid */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#e2e8f0_1px,transparent_1px),linear-gradient(to_bottom,#e2e8f0_1px,transparent_1px)] bg-[size:3rem_3rem] opacity-50 pointer-events-none" />
+      <div className="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-slate-350 to-transparent pointer-events-none" />
 
       <div className="relative z-10 max-w-5xl mx-auto px-6 py-10 space-y-10">
 
         {/* ── Header ─────────────────────────────────────────────────────── */}
-        <header className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-zinc-800 pb-6">
+        <header className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-slate-200 pb-6">
           <div>
-            <Link href="/" className="text-zinc-600 hover:text-lime-400 transition text-[10px] font-bold uppercase tracking-widest">
+            <Link href="/" className="text-slate-400 hover:text-slate-600 transition text-[10px] font-bold uppercase tracking-widest">
               ← Control Hierarchy
             </Link>
-            <h1 className="text-3xl font-black tracking-tighter text-white mt-2">
-              Magazzino <span className="text-zinc-600">//</span> Foto
+            <h1 className="text-3xl font-black tracking-tight text-slate-900 mt-2">
+              Magazzino <span className="text-slate-300">//</span> Foto
             </h1>
-            <p className="text-zinc-500 text-xs mt-1">
+            <p className="text-slate-500 text-xs mt-1 font-sans">
               Carica foto operative e monitora le approvazioni del Preposto.
             </p>
           </div>
-          <div className="flex items-center gap-2 shrink-0">
-            <span className="w-2 h-2 bg-lime-400 animate-pulse" />
-            <span className="text-[10px] text-lime-400 font-bold uppercase tracking-widest">Live</span>
+          <div className="flex items-center gap-2 shrink-0 bg-white border border-slate-200 px-3 py-1.5 rounded-full shadow-sm">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="text-[10px] text-slate-600 font-bold uppercase tracking-widest">Live</span>
           </div>
         </header>
 
         {/* ── SEZIONE UPLOAD ──────────────────────────────────────────────── */}
         <section>
-          <h2 className="text-sm font-bold text-white mb-5 flex items-center gap-2 uppercase tracking-widest">
-            <span className="w-1.5 h-4 bg-lime-500 inline-block" />
+          <h2 className="text-xs font-bold text-slate-800 mb-5 flex items-center gap-2 uppercase tracking-widest">
+            <span className="w-1.5 h-4 bg-slate-500 rounded-full inline-block" />
             Carica Nuova Foto
           </h2>
 
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
 
             {/* Form (3/5) */}
-            <div className="lg:col-span-3 bg-[#09090b] border border-zinc-800 p-6 space-y-4">
+            <div className="lg:col-span-3 bg-white border border-slate-200 p-6 rounded-2xl shadow-sm shadow-slate-100/50 space-y-4">
 
               {/* Selezione disposizione */}
               <div>
-                <label className="block text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-1.5">
+                <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">
                   Disposizione Attiva
                 </label>
                 {disposizioni.length === 0 ? (
-                  <div className="border border-rose-500/20 bg-rose-950/10 text-rose-400 px-4 py-3 text-xs font-sans">
+                  <div className="border border-rose-200 bg-rose-50 text-rose-600 rounded-xl px-4 py-3 text-xs font-sans">
                     ⚠️ Nessuna disposizione approvata. LOG1 deve crearne una.
                   </div>
                 ) : (
@@ -182,7 +182,7 @@ export default function MagazzinoPage() {
                     value={disposizioneId}
                     onChange={(e) => setDisposizioneId(e.target.value)}
                     disabled={uploadLoading}
-                    className="w-full bg-black border border-zinc-800 px-4 py-3 text-sm text-zinc-200 focus:outline-none focus:border-lime-500/60 transition cursor-pointer font-mono"
+                    className="w-full bg-slate-50 border border-slate-200 focus:bg-white rounded-xl px-4 py-3 text-sm text-slate-800 focus:outline-none focus:border-slate-400 focus:ring-1 focus:ring-slate-400 transition-all cursor-pointer font-sans"
                   >
                     {disposizioni.map((d) => (
                       <option key={d.id} value={d.id}>
@@ -195,7 +195,7 @@ export default function MagazzinoPage() {
 
               {/* Descrizione */}
               <div>
-                <label className="block text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-1.5">
+                <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">
                   Note / Descrizione
                 </label>
                 <input
@@ -204,19 +204,19 @@ export default function MagazzinoPage() {
                   onChange={(e) => setDescrizione(e.target.value)}
                   placeholder="Es. Fine carico camion TRJ, Bancale danneggiato..."
                   disabled={uploadLoading || disposizioni.length === 0}
-                  className="w-full bg-black border border-zinc-800 px-4 py-3 text-sm text-zinc-100 placeholder-zinc-700 focus:outline-none focus:border-lime-500/60 transition font-sans"
+                  className="w-full bg-slate-50 border border-slate-200 focus:bg-white rounded-xl px-4 py-3 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:border-slate-400 focus:ring-1 focus:ring-slate-400 transition-all font-sans"
                 />
               </div>
 
               {/* Feedback */}
               {uploadError && (
-                <div className="bg-rose-950/20 border border-rose-500/20 text-rose-400 px-3 py-2.5 text-xs flex gap-2">
-                  <span>⚠️</span>{uploadError}
+                <div className="bg-rose-50 border border-rose-200 text-rose-600 rounded-xl px-4 py-3 text-xs flex gap-2 font-sans items-center">
+                  <span className="text-sm">⚠️</span>{uploadError}
                 </div>
               )}
               {uploadSuccess && (
-                <div className="bg-lime-950/20 border border-lime-500/20 text-lime-400 px-3 py-2.5 text-xs flex gap-2">
-                  <span>✓</span>{uploadSuccess}
+                <div className="bg-emerald-50 border border-emerald-200 text-emerald-600 rounded-xl px-4 py-3 text-xs flex gap-2 font-sans items-center">
+                  <span className="text-sm">✓</span>{uploadSuccess}
                 </div>
               )}
 
@@ -224,11 +224,13 @@ export default function MagazzinoPage() {
                 type="button"
                 onClick={handleSubmit as any}
                 disabled={uploadLoading || disposizioni.length === 0}
-                className="w-full bg-lime-500 hover:bg-lime-400 active:bg-lime-600 text-black font-extrabold py-3 text-xs uppercase tracking-widest transition disabled:opacity-40 cursor-pointer"
+                className="w-full bg-slate-850 hover:bg-slate-750 active:bg-slate-900 text-white font-extrabold py-3.5 rounded-xl text-xs uppercase tracking-widest transition disabled:opacity-40 cursor-pointer shadow-sm shadow-slate-100"
               >
-                {uploadLoading
-                  ? <span className="inline-block w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" />
-                  : "Carica Foto ➔"}
+                {uploadLoading ? (
+                  <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  "Carica Foto ➔"
+                )}
               </button>
             </div>
 
@@ -236,7 +238,7 @@ export default function MagazzinoPage() {
             <div className="lg:col-span-2">
               <label
                 htmlFor="foto-input"
-                className="block h-full min-h-[240px] border-2 border-dashed border-zinc-800 hover:border-lime-500/50 bg-[#09090b] cursor-pointer transition group relative overflow-hidden"
+                className="block h-full min-h-[240px] border-2 border-dashed border-slate-200 hover:border-slate-400 bg-white cursor-pointer transition rounded-2xl shadow-sm shadow-slate-100/40 group relative overflow-hidden"
               >
                 <input
                   id="foto-input"
@@ -262,11 +264,11 @@ export default function MagazzinoPage() {
                   </>
                 ) : (
                   <div className="flex flex-col items-center justify-center h-full min-h-[240px] text-center p-6">
-                    <span className="text-5xl mb-3 group-hover:scale-110 transition">📸</span>
-                    <span className="text-xs font-bold text-zinc-400 group-hover:text-lime-400 transition block">
+                    <span className="text-5xl mb-3 group-hover:scale-110 transition duration-300">📸</span>
+                    <span className="text-xs font-bold text-slate-500 group-hover:text-slate-700 transition block">
                       Tocca per scattare o selezionare
                     </span>
-                    <span className="text-[10px] text-zinc-600 mt-1">
+                    <span className="text-[10px] text-slate-400 mt-1 font-sans">
                       Supporta fotocamera smartphone
                     </span>
                   </div>
@@ -279,24 +281,24 @@ export default function MagazzinoPage() {
         {/* ── SEZIONE GALLERY ─────────────────────────────────────────────── */}
         <section>
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5">
-            <h2 className="text-sm font-bold text-white flex items-center gap-2 uppercase tracking-widest">
-              <span className="w-1.5 h-4 bg-zinc-600 inline-block" />
+            <h2 className="text-xs font-bold text-slate-800 flex items-center gap-2 uppercase tracking-widest">
+              <span className="w-1.5 h-4 bg-slate-400 rounded-full inline-block" />
               Foto Ricevute
-              <span className="text-zinc-600 font-normal normal-case text-xs ml-1">
+              <span className="text-slate-450 font-normal normal-case text-xs ml-1">
                 ({fotoFiltrate.length})
               </span>
             </h2>
 
             {/* Tab filtro */}
-            <div className="flex border border-zinc-800 text-[10px] font-bold overflow-hidden">
+            <div className="flex bg-white border border-slate-200 rounded-xl p-1 shadow-sm text-[10px] font-bold overflow-hidden">
               {(["tutte", "approvate", "in_attesa"] as const).map((tab) => (
                 <button
                   key={tab}
                   onClick={() => setFotoTab(tab)}
-                  className={`px-4 py-2 uppercase tracking-widest transition cursor-pointer ${
+                  className={`px-4 py-2 rounded-lg uppercase tracking-widest transition cursor-pointer ${
                     fotoTab === tab
-                      ? "bg-lime-500 text-black"
-                      : "bg-zinc-900 text-zinc-500 hover:text-white hover:bg-zinc-800"
+                      ? "bg-slate-800 text-white shadow-sm"
+                      : "bg-transparent text-slate-500 hover:text-slate-800"
                   }`}
                 >
                   {tab === "tutte" ? "Tutte" : tab === "approvate" ? "✅ Approvate" : "⏳ In Attesa"}
@@ -306,7 +308,7 @@ export default function MagazzinoPage() {
           </div>
 
           {fotoFiltrate.length === 0 ? (
-            <div className="bg-[#09090b] border border-zinc-800 p-12 text-center text-zinc-600">
+            <div className="bg-white border border-slate-200 p-12 rounded-2xl shadow-sm text-center text-slate-400 font-sans">
               <span className="text-3xl block mb-2">📷</span>
               {fotoTab === "in_attesa"
                 ? "Nessuna foto in attesa."
@@ -320,13 +322,13 @@ export default function MagazzinoPage() {
                 <div
                   key={f.id}
                   onClick={() => setSelectedPhoto(`/api/foto?file_id=${f.telegram_file_id}`)}
-                  className="group cursor-pointer bg-[#09090b] border border-zinc-800 hover:border-zinc-600 transition overflow-hidden"
+                  className="group cursor-pointer bg-white border border-slate-200 hover:border-slate-350 rounded-2xl shadow-sm shadow-slate-100/40 transition-all overflow-hidden"
                 >
                   {/* Status bar */}
-                  <div className={`h-[2px] ${statoBar[f.stato] ?? "bg-zinc-700"}`} />
+                  <div className={`h-[3px] ${statoBar[f.stato] ?? "bg-slate-300"}`} />
 
                   {/* Immagine */}
-                  <div className="aspect-square overflow-hidden bg-zinc-950 relative">
+                  <div className="aspect-square overflow-hidden bg-slate-50 relative border-b border-slate-100">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={`/api/foto?file_id=${f.telegram_file_id}`}
@@ -338,25 +340,25 @@ export default function MagazzinoPage() {
 
                   {/* Footer */}
                   <div className="px-3 py-2.5 space-y-1.5">
-                    <p className="text-[10px] text-zinc-300 truncate font-sans font-medium">
+                    <p className="text-[10px] text-slate-800 truncate font-sans font-medium">
                       {f.descrizione || "Senza descrizione"}
                     </p>
                     <div className="flex items-center justify-between gap-1">
-                      <span className={`text-[9px] font-bold px-1.5 py-0.5 border ${statoBadge[f.stato] ?? ""}`}>
+                      <span className={`text-[9px] font-bold px-2 py-0.5 border rounded-full ${statoBadge[f.stato] ?? ""}`}>
                         {statoLabel[f.stato] ?? f.stato}
                       </span>
-                      <span className="text-[9px] text-zinc-600 font-mono shrink-0">
+                      <span className="text-[9px] text-slate-400 font-mono shrink-0">
                         {new Date(f.created_at).toLocaleDateString("it-IT", { day: "2-digit", month: "2-digit" })}
                         {" "}
                         {new Date(f.created_at).toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" })}
                       </span>
                     </div>
                     {(f as any).disposizioni ? (
-                      <p className="text-[9px] text-lime-500/70 font-mono truncate">
+                      <p className="text-[9px] text-slate-500 font-mono truncate">
                         🔗 {(f as any).disposizioni.codice}
                       </p>
                     ) : (
-                      <p className="text-[9px] text-zinc-700 font-mono">Generica</p>
+                      <p className="text-[9px] text-slate-400 font-mono">Generica</p>
                     )}
                   </div>
                 </div>
@@ -370,11 +372,11 @@ export default function MagazzinoPage() {
       {/* ── Modal anteprima ─────────────────────────────────────────────────── */}
       {selectedPhoto && (
         <div
-          className="fixed inset-0 z-50 bg-black/95 backdrop-blur-sm flex items-center justify-center p-4 cursor-zoom-out"
+          className="fixed inset-0 z-50 bg-black/90 backdrop-blur-sm flex items-center justify-center p-4 cursor-zoom-out"
           onClick={() => setSelectedPhoto(null)}
         >
           <div
-            className="max-w-3xl max-h-[85vh] relative border border-zinc-800 overflow-hidden shadow-2xl"
+            className="max-w-3xl max-h-[85vh] relative border border-slate-700 bg-slate-900 rounded-2xl overflow-hidden shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -385,7 +387,7 @@ export default function MagazzinoPage() {
             />
             <button
               onClick={() => setSelectedPhoto(null)}
-              className="absolute top-3 right-3 bg-black/80 hover:bg-zinc-900 text-white w-8 h-8 flex items-center justify-center border border-zinc-700 transition cursor-pointer text-sm"
+              className="absolute top-3 right-3 bg-black/80 hover:bg-black text-white w-8 h-8 rounded-full flex items-center justify-center transition cursor-pointer text-sm"
             >
               ✕
             </button>
