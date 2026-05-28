@@ -177,7 +177,7 @@ export default function Log1Dashboard() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full bg-slate-850 hover:bg-slate-750 active:bg-slate-900 text-white font-extrabold py-3.5 rounded-xl text-xs uppercase tracking-widest transition disabled:opacity-40 cursor-pointer shadow-sm shadow-slate-100"
+                  className="w-full bg-slate-800 hover:bg-slate-700 active:bg-slate-900 text-white font-extrabold py-3.5 rounded-xl text-xs uppercase tracking-widest transition disabled:opacity-40 cursor-pointer shadow-sm shadow-slate-100"
                 >
                   {loading ? (
                     <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />

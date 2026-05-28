@@ -105,7 +105,7 @@ export default function Home() {
                   </p>
                 </div>
               </div>
-              <div className="flex items-center gap-2 text-xs text-slate-600 border border-slate-200 bg-slate-50 rounded-xl px-4 py-2 font-bold group-hover:bg-slate-850 group-hover:text-white group-hover:border-slate-850 transition-all shadow-sm">
+              <div className="flex items-center gap-2 text-xs text-slate-600 border border-slate-200 bg-slate-50 rounded-xl px-4 py-2 font-bold group-hover:bg-slate-800 group-hover:text-white group-hover:border-slate-800 transition-all shadow-sm">
                 ACCEDI ➔
               </div>
             </Link>
@@ -129,7 +129,7 @@ export default function Home() {
                   </p>
                 </div>
               </div>
-              <div className="flex items-center gap-2 text-xs text-slate-600 border border-slate-200 bg-slate-50 rounded-xl px-4 py-2 font-bold group-hover:bg-slate-850 group-hover:text-white group-hover:border-slate-850 transition-all shadow-sm">
+              <div className="flex items-center gap-2 text-xs text-slate-600 border border-slate-200 bg-slate-50 rounded-xl px-4 py-2 font-bold group-hover:bg-slate-800 group-hover:text-white group-hover:border-slate-800 transition-all shadow-sm">
                 ACCEDI ➔
               </div>
             </Link>
@@ -153,7 +153,7 @@ export default function Home() {
                   </p>
                 </div>
               </div>
-              <div className="flex items-center gap-2 text-xs text-slate-600 border border-slate-200 bg-slate-50 rounded-xl px-4 py-2 font-bold group-hover:bg-slate-850 group-hover:text-white group-hover:border-slate-850 transition-all shadow-sm">
+              <div className="flex items-center gap-2 text-xs text-slate-600 border border-slate-200 bg-slate-50 rounded-xl px-4 py-2 font-bold group-hover:bg-slate-800 group-hover:text-white group-hover:border-slate-800 transition-all shadow-sm">
                 ACCEDI ➔
               </div>
             </Link>
@@ -193,7 +193,7 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="bg-slate-850/60 border border-slate-800 p-4 rounded-xl text-[10px] text-slate-400 leading-relaxed font-sans">
+            <div className="bg-slate-800/60 border border-slate-800 p-4 rounded-xl text-[10px] text-slate-400 leading-relaxed font-sans">
               <strong>Nota Operativa:</strong> Le approvazioni in tempo reale richiedono l'abilitazione del Webhook. Assicurati che il bot Telegram sia stato avviato e le variabili d'ambiente inserite nel file <code>.env.local</code> siano valide.
             </div>
           </div>

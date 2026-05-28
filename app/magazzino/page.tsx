@@ -93,10 +93,12 @@ export default function MagazzinoPage() {
 
           {/* ── COLONNA DISPOSIZIONI ATTIVE (2/5) ───────────────────────────── */}
           <section className="lg:col-span-2 space-y-4">
-            <h2 className="text-xs font-bold text-slate-800 flex items-center gap-2 uppercase tracking-widest">
-              <span className="w-1.5 h-4 bg-slate-555 rounded-full inline-block" />
-              Disposizioni Attive ({disposizioni.length})
-            </h2>
+            <div className="flex items-center min-h-[40px]">
+              <h2 className="text-xs font-bold text-slate-800 flex items-center gap-2 uppercase tracking-widest">
+                <span className="w-1.5 h-4 bg-slate-500 rounded-full inline-block" />
+                Disposizioni Attive ({disposizioni.length})
+              </h2>
+            </div>
 
             {disposizioni.length === 0 ? (
               <div className="bg-white border border-slate-200 p-8 rounded-2xl shadow-sm text-center text-slate-450 font-sans leading-relaxed">
@@ -135,7 +137,7 @@ export default function MagazzinoPage() {
 
           {/* ── COLONNA FOTO GALLERY (3/5) ──────────────────────────────────── */}
           <section className="lg:col-span-3 space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 min-h-[40px]">
               <h2 className="text-xs font-bold text-slate-800 flex items-center gap-2 uppercase tracking-widest">
                 <span className="w-1.5 h-4 bg-slate-400 rounded-full inline-block" />
                 Foto Ricevute ({fotoFiltrate.length})
