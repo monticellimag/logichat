@@ -91,7 +91,7 @@ export const telegramClient = {
       const formData = new FormData();
       formData.append("chat_id", String(chatId));
       
-      const blob = new Blob([photo], { type: "image/jpeg" });
+      const blob = new Blob([photo as any], { type: "image/jpeg" });
       formData.append("photo", blob, "photo.jpg");
 
       if (caption) formData.append("caption", caption);
