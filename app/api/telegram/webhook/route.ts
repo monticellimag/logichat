@@ -4,7 +4,8 @@ import { telegramClient } from "@/lib/telegram";
 
 const PREPOSTO_1_CHAT_ID = process.env.PREPOSTO_1_CHAT_ID;
 const PREPOSTO_2_CHAT_ID = process.env.PREPOSTO_2_CHAT_ID;
-const OPERAI_GROUP_CHAT_ID = process.env.OPERAI_GROUP_CHAT_ID;
+const TELEGRAM_DISPOSIZIONI_CHANNEL_ID = process.env.TELEGRAM_DISPOSIZIONI_CHANNEL_ID;
+const TELEGRAM_ARCHIVE_CHANNEL_ID = process.env.TELEGRAM_ARCHIVE_CHANNEL_ID;
 
 /**
  * Helper per identificare quale Preposto ha cliccato in base al chat_id
@@ -22,8 +23,117 @@ function getPrepostoName(chatId: string) {
 export async function POST(request: Request) {
   try {
     const payload = await request.json();
+
+    // 1. GESTIONE DEI MESSAGGI CON FOTO (Magazziniere che posta direttamente nel canale/gruppo archivio)
+    const messageObj = payload.message || payload.channel_post;
+    if (messageObj && messageObj.photo && messageObj.photo.length > 0) {
+      const chatId = String(messageObj.chat.id);
+
+      const targetArchiveId = TELEGRAM_ARCHIVE_CHANNEL_ID || "";
+      const isArchiveChat = 
+        chatId === targetArchiveId || 
+        chatId === `-100${targetArchiveId.replace("-", "")}` ||
+        targetArchiveId === `-100${chatId.replace("-", "")}`;
+
+      if (isArchiveChat) {
+        const photoArray = messageObj.photo;
+        const telegramFileId = photoArray[photoArray.length - 1].file_id;
+        const caption = messageObj.caption || "";
+
+        // 1.1 Cerca corrispondenza automatica con una disposizione su Supabase
+        const { data: allDisposizioni } = await supabaseAdmin
+          .from("disposizioni")
+          .select("id, codice")
+          .order("created_at", { ascending: false });
+
+        let linkedDisposizioneId = null;
+        let linkedCodice = "Generica/Nessuna";
+
+        if (allDisposizioni) {
+          for (const disp of allDisposizioni) {
+            if (caption.toLowerCase().includes(disp.codice.toLowerCase())) {
+              linkedDisposizioneId = disp.id;
+              linkedCodice = disp.codice;
+              break;
+            }
+          }
+        }
+
+        // 1.2 Guardia anti-duplicazione: ignora se la stessa foto è già stata ricevuta negli ultimi 10 minuti
+        const twoHoursAgo = new Date(Date.now() - 10 * 60 * 1000).toISOString();
+        const { data: existing } = await supabaseAdmin
+          .from("foto_magazzino")
+          .select("id")
+          .eq("telegram_file_id", telegramFileId)
+          .gte("created_at", twoHoursAgo)
+          .maybeSingle();
+
+        if (existing) {
+          console.log(`[WEBHOOK] Foto già registrata (ID: ${existing.id}), ignoro duplicato.`);
+          return NextResponse.json({ ok: true, message: "Duplicate photo ignored" });
+        }
+
+        // 1.3 Salva nel database Supabase come in_attesa
+        const { data: fotoRecord, error: dbError } = await supabaseAdmin
+          .from("foto_magazzino")
+          .insert([
+            {
+              descrizione: caption || "Foto caricata direttamente da Telegram",
+              telegram_file_id: telegramFileId,
+              stato: "in_attesa",
+              disposizione_id: linkedDisposizioneId,
+            },
+          ])
+          .select()
+          .single();
+
+        if (dbError) {
+          console.error("Errore salvataggio foto da Telegram nel DB:", dbError.message);
+          return NextResponse.json({ error: dbError.message }, { status: 500 });
+        }
+
+
+        // 1.3 Prepara i tasti di approvazione per i Preposti
+        const inlineKeyboard = {
+          inline_keyboard: [
+            [
+              {
+                text: "✅ APPROVA FOTO",
+                callback_data: `approve_foto_${fotoRecord.id}`,
+              },
+              {
+                text: "❌ RIFIUTA FOTO",
+                callback_data: `reject_foto_${fotoRecord.id}`,
+              },
+            ],
+          ],
+        };
+
+        const notificationText = `📷 *Nuova foto caricata dal Magazzino su Telegram*
+
+*Didascalia/Note:* ${caption || "Nessuna nota fornita"}
+*Disposizione Collegata:* \`${linkedCodice}\`
+
+Scegli come procedere:`;
+
+        const prepostiChatIds = [PREPOSTO_1_CHAT_ID, PREPOSTO_2_CHAT_ID].filter(Boolean) as string[];
+        console.log("DEBUG: PREPOSTI_CHAT_IDS =", prepostiChatIds);
+
+        // 1.4 Invia l'anteprima foto + bottoni di approvazione ai Preposti
+        const notificationPromises = prepostiChatIds.map((pChatId) =>
+          telegramClient.sendPhoto(pChatId, telegramFileId, notificationText, inlineKeyboard)
+            .catch((err) => {
+              console.error(`Errore nell'invio dell'anteprima foto al Preposto (${pChatId}):`, err);
+              return null;
+            })
+        );
+
+        await Promise.all(notificationPromises);
+        return NextResponse.json({ ok: true, message: "Photo parsed and forwarded to Preposti" });
+      }
+    }
     
-    // Gestiamo solo le callback query (click sui pulsanti inline)
+    // Gestiamo solo le callback query (click sui pulsanti inline) per il resto del flusso
     if (!payload.callback_query) {
       return NextResponse.json({ ok: true }); // Ignora altri messaggi
     }
@@ -78,8 +188,8 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: error?.message || "Record not found" }, { status: 500 });
       }
 
-      // 2. Se approvato, SMISTA la disposizione al gruppo degli Operai
-      if (isApproval && OPERAI_GROUP_CHAT_ID) {
+      // 2. Se approvato, SMISTA la disposizione al canale delle Disposizioni
+      if (isApproval && TELEGRAM_DISPOSIZIONI_CHANNEL_ID) {
         const operaiMessage = `📣 *NUOVA DISPOSIZIONE UFFICIALE*
         
 *Codice:* \`${disposizione.codice}\`
@@ -87,8 +197,8 @@ export async function POST(request: Request) {
 
 🟢 *Disposizione approvata dal Preposto. I magazzinieri possono procedere e caricare le foto relative.*`;
 
-        await telegramClient.sendMessage(OPERAI_GROUP_CHAT_ID, operaiMessage).catch((err) => {
-          console.error("Errore nell'inoltro della disposizione agli Operai:", err);
+        await telegramClient.sendMessage(TELEGRAM_DISPOSIZIONI_CHANNEL_ID, operaiMessage).catch((err) => {
+          console.error("Errore nell'inoltro della disposizione al canale:", err);
         });
       }
 

@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { Disposizione, FotoMagazzino } from "@/types";
+import React, { useState, useEffect, useCallback } from "react";
+import Link from "next/link";
 
 export default function Log1Dashboard() {
   const [disposizioni, setDisposizioni] = useState<any[]>([]);
@@ -10,26 +10,22 @@ export default function Log1Dashboard() {
   const [loading, setLoading] = useState(false);
   const [submitError, setSubmitError] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
-  const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
 
-  // Carica i dati delle disposizioni e foto associate
-  const fetchDisposizioni = async () => {
+  const fetchDisposizioni = useCallback(async () => {
     try {
       const res = await fetch("/api/disposizioni");
-      if (!res.ok) throw new Error("Errore durante il recupero dei dati");
-      const data = await res.json();
-      setDisposizioni(data);
-    } catch (err: any) {
-      console.error(err);
+      if (!res.ok) throw new Error();
+      setDisposizioni(await res.json());
+    } catch {
+      console.error("Errore recupero disposizioni");
     }
-  };
+  }, []);
 
-  // Poll ogni 10 secondi per aggiornamenti in tempo reale
   useEffect(() => {
     fetchDisposizioni();
-    const interval = setInterval(fetchDisposizioni, 10000);
-    return () => clearInterval(interval);
-  }, []);
+    const id = setInterval(fetchDisposizioni, 10000);
+    return () => clearInterval(id);
+  }, [fetchDisposizioni]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,7 +34,7 @@ export default function Log1Dashboard() {
     setSuccessMsg("");
 
     if (!codice.trim() || !descrizione.trim()) {
-      setSubmitError("Codice e descrizione sono richiesti");
+      setSubmitError("Codice e descrizione sono richiesti.");
       setLoading(false);
       return;
     }
@@ -49,14 +45,10 @@ export default function Log1Dashboard() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ codice: codice.trim(), descrizione: descrizione.trim() }),
       });
-
       const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Errore invio");
 
-      if (!res.ok) {
-        throw new Error(data.error || "Impossibile inviare la disposizione");
-      }
-
-      setSuccessMsg(`Disposizione ${codice} inviata ed in attesa di approvazione!`);
+      setSuccessMsg(`Disposizione "${codice.trim()}" inviata al Preposto.`);
       setCodice("");
       setDescrizione("");
       fetchDisposizioni();
@@ -67,239 +59,189 @@ export default function Log1Dashboard() {
     }
   };
 
-  return (
-    <main className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900 text-slate-100 p-6 md:p-12">
-      {/* Header */}
-      <header className="max-w-6xl mx-auto mb-10 flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-slate-800/80 pb-6">
-        <div>
-          <h1 className="text-3xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-indigo-300 to-teal-200">
-            LOG1 Dashboard
-          </h1>
-          <p className="text-slate-400 mt-1 text-sm md:text-base">
-            Inserisci disposizioni e monitora le foto approvate dei magazzinieri.
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
-          <span className="text-xs text-emerald-400/90 font-mono tracking-widest uppercase">
-            Live Polling Attivo
-          </span>
-        </div>
-      </header>
+  const statusStyle: Record<string, { bar: string; badge: string; label: string }> = {
+    in_attesa: {
+      bar: "bg-amber-500",
+      badge: "bg-amber-500/10 border-amber-500/30 text-amber-400",
+      label: "⏳ In Attesa",
+    },
+    approvato: {
+      bar: "bg-lime-500",
+      badge: "bg-lime-500/10 border-lime-500/30 text-lime-400",
+      label: "✅ Approvata",
+    },
+    rifiutato: {
+      bar: "bg-rose-500",
+      badge: "bg-rose-500/10 border-rose-500/30 text-rose-400",
+      label: "❌ Rifiutata",
+    },
+  };
 
-      <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Form Sezione (1/3) */}
-        <section className="lg:col-span-1">
-          <div className="bg-slate-900/50 backdrop-blur-md p-6 rounded-2xl border border-white/5 shadow-2xl relative overflow-hidden group">
-            {/* Subtle glow effect */}
-            <div className="absolute -inset-px bg-gradient-to-r from-blue-500/10 to-indigo-500/10 rounded-2xl blur opacity-30 group-hover:opacity-50 transition duration-500" />
-            
-            <h2 className="text-xl font-bold mb-4 relative z-10 text-white flex items-center gap-2">
-              <span>📤</span> Nuova Disposizione
+  const counts = {
+    in_attesa: disposizioni.filter((d) => d.stato === "in_attesa").length,
+    approvato: disposizioni.filter((d) => d.stato === "approvato").length,
+    rifiutato: disposizioni.filter((d) => d.stato === "rifiutato").length,
+  };
+
+  return (
+    <main className="min-h-screen bg-[#000000] text-zinc-100 font-mono relative overflow-hidden">
+      {/* Grid bg */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#111_1px,transparent_1px),linear-gradient(to_bottom,#111_1px,transparent_1px)] bg-[size:4rem_4rem] pointer-events-none" />
+      <div className="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-lime-500/20 to-transparent pointer-events-none" />
+
+      <div className="relative z-10 max-w-5xl mx-auto px-6 py-10">
+
+        {/* ── Header ───────────────────────────────────────────────────────── */}
+        <header className="mb-10 flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-zinc-800 pb-6">
+          <div>
+            <Link href="/" className="text-zinc-600 hover:text-lime-400 transition text-[10px] font-bold uppercase tracking-widest">
+              ← Control Hierarchy
+            </Link>
+            <h1 className="text-3xl font-black tracking-tighter text-white mt-2">
+              LOG1 <span className="text-zinc-600">//</span> Disposizioni
+            </h1>
+            <p className="text-zinc-500 text-xs mt-1">
+              Crea e monitora le disposizioni operative inviate ai magazzinieri.
+            </p>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <span className="w-2 h-2 rounded-none bg-lime-400 animate-pulse" />
+            <span className="text-[10px] text-lime-400 font-bold uppercase tracking-widest">Live</span>
+          </div>
+        </header>
+
+        {/* ── KPI strip ────────────────────────────────────────────────────── */}
+        <div className="grid grid-cols-3 gap-3 mb-10">
+          {[
+            { label: "In Attesa", value: counts.in_attesa, color: "text-amber-400", border: "border-amber-500/20" },
+            { label: "Approvate", value: counts.approvato, color: "text-lime-400", border: "border-lime-500/20" },
+            { label: "Rifiutate", value: counts.rifiutato, color: "text-rose-400", border: "border-rose-500/20" },
+          ].map((k) => (
+            <div key={k.label} className={`bg-[#09090b] border ${k.border} p-4 text-center`}>
+              <div className={`text-2xl font-black ${k.color}`}>{k.value}</div>
+              <div className="text-[10px] text-zinc-500 uppercase tracking-widest mt-1">{k.label}</div>
+            </div>
+          ))}
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
+
+          {/* ── FORM (2/5) ───────────────────────────────────────────────── */}
+          <section className="lg:col-span-2">
+            <div className="bg-[#09090b] border border-zinc-800 p-6 sticky top-6">
+              <h2 className="text-sm font-bold text-white mb-5 flex items-center gap-2 uppercase tracking-widest">
+                <span className="w-1.5 h-4 bg-lime-500 inline-block" />
+                Nuova Disposizione
+              </h2>
+
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                  <label className="block text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-1.5">
+                    Codice
+                  </label>
+                  <input
+                    type="text"
+                    value={codice}
+                    onChange={(e) => setCodice(e.target.value)}
+                    placeholder="Es. LOG1-2026-001"
+                    disabled={loading}
+                    className="w-full bg-black border border-zinc-800 px-4 py-3 text-sm text-zinc-100 placeholder-zinc-700 focus:outline-none focus:border-lime-500/60 transition font-mono"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[10px] font-bold text-zinc-500 uppercase tracking-widest mb-1.5">
+                    Istruzione
+                  </label>
+                  <textarea
+                    value={descrizione}
+                    onChange={(e) => setDescrizione(e.target.value)}
+                    placeholder="Scrivi l'istruzione operativa..."
+                    rows={5}
+                    disabled={loading}
+                    className="w-full bg-black border border-zinc-800 px-4 py-3 text-sm text-zinc-100 placeholder-zinc-700 focus:outline-none focus:border-lime-500/60 transition resize-none font-sans"
+                  />
+                </div>
+
+                {submitError && (
+                  <div className="bg-rose-950/20 border border-rose-500/20 text-rose-400 px-3 py-2.5 text-xs flex gap-2">
+                    <span>⚠️</span>{submitError}
+                  </div>
+                )}
+                {successMsg && (
+                  <div className="bg-lime-950/20 border border-lime-500/20 text-lime-400 px-3 py-2.5 text-xs flex gap-2">
+                    <span>✓</span>{successMsg}
+                  </div>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full bg-lime-500 hover:bg-lime-400 active:bg-lime-600 text-black font-extrabold py-3 text-xs uppercase tracking-widest transition disabled:opacity-40 cursor-pointer"
+                >
+                  {loading
+                    ? <span className="inline-block w-4 h-4 border-2 border-black border-t-transparent rounded-full animate-spin" />
+                    : "Invia al Preposto ➔"}
+                </button>
+              </form>
+            </div>
+          </section>
+
+          {/* ── STORICO (3/5) ────────────────────────────────────────────── */}
+          <section className="lg:col-span-3 space-y-3">
+            <h2 className="text-sm font-bold text-white flex items-center gap-2 uppercase tracking-widest">
+              <span className="w-1.5 h-4 bg-zinc-600 inline-block" />
+              Storico ({disposizioni.length})
             </h2>
 
-            <form onSubmit={handleSubmit} className="space-y-4 relative z-10">
-              <div>
-                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
-                  Codice Disposizione
-                </label>
-                <input
-                  type="text"
-                  value={codice}
-                  onChange={(e) => setCodice(e.target.value)}
-                  placeholder="E.g., LOG1-2026-001"
-                  className="w-full bg-slate-950/80 border border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-transparent transition"
-                  disabled={loading}
-                />
+            {disposizioni.length === 0 ? (
+              <div className="bg-[#09090b] border border-zinc-800 p-12 text-center text-zinc-600">
+                <span className="text-3xl block mb-2">📋</span>
+                Nessuna disposizione ancora creata.
               </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
-                  Dettaglio Istruzione
-                </label>
-                <textarea
-                  value={descrizione}
-                  onChange={(e) => setDescrizione(e.target.value)}
-                  placeholder="Scrivi qui cosa deve fare il magazzino..."
-                  rows={4}
-                  className="w-full bg-slate-950/80 border border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-transparent transition resize-none"
-                  disabled={loading}
-                />
-              </div>
-
-              {submitError && (
-                <div className="bg-rose-500/10 border border-rose-500/20 text-rose-400 px-4 py-3 rounded-xl text-xs flex items-center gap-2">
-                  <span>⚠️</span> {submitError}
-                </div>
-              )}
-
-              {successMsg && (
-                <div className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-4 py-3 rounded-xl text-xs flex items-center gap-2">
-                  <span>✓</span> {successMsg}
-                </div>
-              )}
-
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-medium rounded-xl py-3 px-4 text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 flex items-center justify-center gap-2 shadow-lg shadow-blue-500/20 cursor-pointer disabled:opacity-50"
-              >
-                {loading ? (
-                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                ) : (
-                  <>
-                    <span>Invia al Preposto</span>
-                    <span>➔</span>
-                  </>
-                )}
-              </button>
-            </form>
-          </div>
-        </section>
-
-        {/* Tabella / Lista Sezione (2/3) */}
-        <section className="lg:col-span-2 space-y-6">
-          <h2 className="text-xl font-bold text-white flex items-center gap-2">
-            <span>📋</span> Storico Disposizioni & Foto Approva
-          </h2>
-
-          {disposizioni.length === 0 ? (
-            <div className="bg-slate-900/30 backdrop-blur-sm border border-slate-800/80 rounded-2xl p-12 text-center text-slate-500">
-              <span className="text-4xl block mb-2">📦</span>
-              Nessuna disposizione inserita finora.
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {disposizioni.map((disp) => {
-                const badgeColors: Record<string, string> = {
-                  in_attesa: "bg-amber-500/10 text-amber-400 border-amber-500/20",
-                  approvato: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
-                  rifiutato: "bg-rose-500/10 text-rose-400 border-rose-500/20",
-                };
-
-                const badgeLabels: Record<string, string> = {
-                  in_attesa: "⏳ In Attesa Preposto",
-                  approvato: "✅ Approvata",
-                  rifiutato: "❌ Rifiutata",
-                };
-
-                // Filtra solo le foto approvate da mostrare
-                const approvedPhotos = (disp.foto_magazzino || []).filter(
-                  (f: FotoMagazzino) => f.stato === "approvato"
-                );
-
+            ) : (
+              disposizioni.map((d) => {
+                const s = statusStyle[d.stato] ?? statusStyle.in_attesa;
                 return (
                   <div
-                    key={disp.id}
-                    className="bg-slate-900/40 backdrop-blur-md rounded-2xl border border-white/5 p-6 hover:bg-slate-900/60 transition duration-300 relative overflow-hidden group"
+                    key={d.id}
+                    className="bg-[#09090b] border border-zinc-800 hover:border-zinc-700 transition overflow-hidden"
                   >
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
-                      <div>
-                        <span className="font-mono text-xs text-blue-400 font-bold bg-blue-500/5 px-2.5 py-1 rounded-md border border-blue-500/10">
-                          {disp.codice}
-                        </span>
-                        <span className="text-xs text-slate-500 ml-3">
-                          {new Date(disp.created_at).toLocaleDateString("it-IT", {
-                            day: "2-digit",
-                            month: "2-digit",
-                            year: "numeric",
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}
-                        </span>
-                      </div>
-                      <span
-                        className={`text-xs font-semibold px-3 py-1.5 rounded-full border ${
-                          badgeColors[disp.stato]
-                        }`}
-                      >
-                        {badgeLabels[disp.stato]}
-                      </span>
-                    </div>
-
-                    <p className="text-slate-300 text-sm mb-4 leading-relaxed">
-                      {disp.descrizione}
-                    </p>
-
-                    {/* Dettagli della decisione */}
-                    {disp.stato !== "in_attesa" && (
-                      <div className="bg-slate-950/40 border border-slate-800/50 rounded-xl px-4 py-2.5 text-xs text-slate-400 mb-4 flex items-center gap-2">
-                        <span>👤</span> Deciso da:{" "}
-                        <strong className="text-slate-300">{disp.approvato_da}</strong> il{" "}
-                        {new Date(disp.decisione_data).toLocaleDateString("it-IT")}
-                      </div>
-                    )}
-
-                    {/* Foto associate approvate */}
-                    {disp.stato === "approvato" && (
-                      <div className="border-t border-slate-800/80 pt-4 mt-4">
-                        <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-1.5">
-                          <span>📷</span> Foto Magazzino Approvare ({approvedPhotos.length})
-                        </h4>
-
-                        {approvedPhotos.length === 0 ? (
-                          <p className="text-xs text-slate-500 italic">
-                            In attesa che il magazziniere carichi le foto...
+                    {/* colored top bar */}
+                    <div className={`h-[2px] ${s.bar}`} />
+                    <div className="px-5 py-4 flex items-start justify-between gap-4">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-3 mb-2">
+                          <span className="text-lime-400 font-mono text-xs font-bold bg-lime-500/5 border border-lime-500/10 px-2 py-0.5">
+                            {d.codice}
+                          </span>
+                          <span className="text-[10px] text-zinc-600 font-mono">
+                            {new Date(d.created_at).toLocaleString("it-IT", {
+                              day: "2-digit", month: "2-digit",
+                              hour: "2-digit", minute: "2-digit",
+                            })}
+                          </span>
+                        </div>
+                        <p className="text-zinc-300 text-sm font-sans leading-relaxed line-clamp-2">
+                          {d.descrizione}
+                        </p>
+                        {d.approvato_da && (
+                          <p className="text-[10px] text-zinc-600 mt-2 font-mono">
+                            👤 {d.approvato_da} · {new Date(d.decisione_data).toLocaleDateString("it-IT")}
                           </p>
-                        ) : (
-                          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                            {approvedPhotos.map((foto: FotoMagazzino) => (
-                              <div
-                                key={foto.id}
-                                className="group/photo relative bg-slate-950 rounded-xl overflow-hidden border border-slate-800 hover:border-blue-500/50 transition cursor-pointer"
-                                onClick={() =>
-                                  setSelectedPhoto(`/api/foto?file_id=${foto.telegram_file_id}`)
-                                }
-                              >
-                                <div className="aspect-square relative w-full overflow-hidden">
-                                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                                  <img
-                                    src={`/api/foto?file_id=${foto.telegram_file_id}`}
-                                    alt={foto.descrizione}
-                                    className="object-cover w-full h-full group-hover/photo:scale-105 transition duration-300"
-                                  />
-                                </div>
-                                <div className="p-2 bg-slate-950/95 border-t border-slate-900">
-                                  <p className="text-[10px] text-slate-400 truncate font-medium">
-                                    {foto.descrizione}
-                                  </p>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
                         )}
                       </div>
-                    )}
+                      <span className={`shrink-0 text-[10px] font-bold px-2.5 py-1 border ${s.badge} uppercase tracking-wider`}>
+                        {s.label}
+                      </span>
+                    </div>
                   </div>
                 );
-              })}
-            </div>
-          )}
-        </section>
-      </div>
-
-      {/* Modal di anteprima foto */}
-      {selectedPhoto && (
-        <div
-          className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4 cursor-zoom-out"
-          onClick={() => setSelectedPhoto(null)}
-        >
-          <div className="max-w-4xl max-h-[85vh] relative rounded-2xl overflow-hidden border border-white/10 shadow-2xl">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={selectedPhoto}
-              alt="Anteprima foto"
-              className="object-contain max-h-[80vh] w-full"
-            />
-            <button
-              className="absolute top-4 right-4 bg-slate-950/80 hover:bg-slate-900 text-white rounded-full w-9 h-9 flex items-center justify-center border border-white/10 transition cursor-pointer"
-              onClick={() => setSelectedPhoto(null)}
-            >
-              ✕
-            </button>
-          </div>
+              })
+            )}
+          </section>
         </div>
-      )}
+      </div>
     </main>
   );
 }

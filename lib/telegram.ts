@@ -135,6 +135,7 @@ export const telegramClient = {
     if (!response.ok) {
       const errorText = await response.text();
       console.error(`Telegram answerCallbackQuery failed: ${errorText}`);
+      return { ok: false, error: errorText };
     }
 
     return response.json();

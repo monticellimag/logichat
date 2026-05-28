@@ -92,6 +92,8 @@ export async function POST(request: Request) {
 *Descrizione:* ${descrizione}
 *Codice Disposizione:* ${disposizione.codice}`;
 
+    console.log("DEBUG: TELEGRAM_ARCHIVE_CHANNEL_ID =", TELEGRAM_ARCHIVE_CHANNEL_ID);
+
     const archiveResponse = await telegramClient.sendPhoto(
       TELEGRAM_ARCHIVE_CHANNEL_ID,
       buffer,
