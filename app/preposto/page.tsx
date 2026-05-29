@@ -1,15 +1,14 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
-import { FotoMagazzino } from "@/types";
 
 export default function PrepostoDashboard() {
   const [disposizioni, setDisposizioni] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState<"disposizioni" | "foto">("disposizioni");
   const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
 
-  const fetchAllData = async () => {
+  const fetchAllData = useCallback(async () => {
     try {
       const res = await fetch("/api/disposizioni");
       if (!res.ok) throw new Error("Errore nel recupero dati");
@@ -18,13 +17,14 @@ export default function PrepostoDashboard() {
     } catch (err) {
       console.error(err);
     }
-  };
+  }, []);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchAllData();
     const interval = setInterval(fetchAllData, 12000);
     return () => clearInterval(interval);
-  }, []);
+  }, [fetchAllData]);
 
   // Elabora tutte le foto caricate nel sistema estraendole dalle disposizioni
   const allPhotos: any[] = [];
@@ -65,7 +65,7 @@ export default function PrepostoDashboard() {
             </Link>
           </div>
           <h1 className="text-3xl font-black tracking-tight text-slate-900 mt-2">
-            PREPOSTO <span className="text-slate-300">//</span> CONTROL ROOM
+            PREPOSTO <span className="text-slate-300">{"//"}</span> CONTROL ROOM
           </h1>
           <p className="text-slate-500 mt-1 text-xs font-sans">
             Registro storico delle approvazioni e controllo attività sul Bot Telegram.
