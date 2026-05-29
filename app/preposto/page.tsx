@@ -8,6 +8,8 @@ export default function PrepostoDashboard() {
   const [activeTab, setActiveTab] = useState<"disposizioni" | "foto">("disposizioni");
   const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [filterTipologia, setFilterTipologia] = useState("tutti");
+  const [filterStato, setFilterStato] = useState("tutti");
 
   const fetchAllData = useCallback(async () => {
     try {
@@ -35,6 +37,7 @@ export default function PrepostoDashboard() {
         allPhotos.push({
           ...f,
           codiceDisposizione: disp.codice,
+          tipologiaDisposizione: disp.tipologia || "generica",
         });
       });
     }
@@ -43,20 +46,49 @@ export default function PrepostoDashboard() {
   // Ordina per data decrescente
   allPhotos.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
-  // Filtra per ricerca
+  // Filtra per ricerca e parametri avanzati
   const filteredDisposizioni = disposizioni.filter((d) => {
-    if (!searchTerm.trim()) return true;
-    const term = searchTerm.toLowerCase().trim();
-    return d.codice.toLowerCase().includes(term) || d.descrizione.toLowerCase().includes(term);
+    // 1. Ricerca testuale
+    if (searchTerm.trim()) {
+      const term = searchTerm.toLowerCase().trim();
+      const matchText = d.codice.toLowerCase().includes(term) || d.descrizione.toLowerCase().includes(term);
+      if (!matchText) return false;
+    }
+
+    // 2. Filtro Tipologia
+    if (filterTipologia !== "tutti" && d.tipologia !== filterTipologia) {
+      return false;
+    }
+
+    // 3. Filtro Stato
+    if (filterStato !== "tutti" && d.stato !== filterStato) {
+      return false;
+    }
+
+    return true;
   });
 
   const filteredPhotos = allPhotos.filter((f) => {
-    if (!searchTerm.trim()) return true;
-    const term = searchTerm.toLowerCase().trim();
-    return (
-      (f.codiceDisposizione && f.codiceDisposizione.toLowerCase().includes(term)) ||
-      (f.descrizione && f.descrizione.toLowerCase().includes(term))
-    );
+    // 1. Ricerca testuale
+    if (searchTerm.trim()) {
+      const term = searchTerm.toLowerCase().trim();
+      const matchText = 
+        (f.codiceDisposizione && f.codiceDisposizione.toLowerCase().includes(term)) ||
+        (f.descrizione && f.descrizione.toLowerCase().includes(term));
+      if (!matchText) return false;
+    }
+
+    // 2. Filtro Tipologia
+    if (filterTipologia !== "tutti" && f.tipologiaDisposizione !== filterTipologia) {
+      return false;
+    }
+
+    // 3. Filtro Stato
+    if (filterStato !== "tutti" && f.stato !== filterStato) {
+      return false;
+    }
+
+    return true;
   });
 
   // Statistiche rapide
@@ -165,6 +197,41 @@ export default function PrepostoDashboard() {
               className="w-full bg-white border border-slate-200 focus:border-slate-400 rounded-xl pl-9 pr-4 py-2 text-xs text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400 transition-all shadow-sm"
             />
             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs">🔍</span>
+          </div>
+        </div>
+
+        {/* Pannello filtri avanzati per entrambe le sezioni */}
+        <div className="bg-white border border-slate-200 p-4 rounded-2xl shadow-sm shadow-slate-100/50 mb-6 grid grid-cols-1 sm:grid-cols-2 gap-4 relative z-10">
+          <div>
+            <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">
+              Filtra per Tipologia
+            </label>
+            <select
+              value={filterTipologia}
+              onChange={(e) => setFilterTipologia(e.target.value)}
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-750 focus:outline-none focus:border-slate-350 cursor-pointer font-sans"
+            >
+              <option value="tutti">📁 Tutti i flussi</option>
+              <option value="carico">🔵 Solo Carichi</option>
+              <option value="scarico">🟢 Solo Scarichi</option>
+              <option value="priorita">🚨 Solo Priorità</option>
+              <option value="generica">📦 Solo Generiche</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">
+              Filtra per Stato
+            </label>
+            <select
+              value={filterStato}
+              onChange={(e) => setFilterStato(e.target.value)}
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-750 focus:outline-none focus:border-slate-350 cursor-pointer font-sans"
+            >
+              <option value="tutti">📊 Tutti gli Stati</option>
+              <option value="approvato">✅ Solo Approvati</option>
+              <option value="rifiutato">❌ Solo Rifiutati</option>
+              <option value="in_attesa">⏳ Solo In Attesa</option>
+            </select>
           </div>
         </div>
 
