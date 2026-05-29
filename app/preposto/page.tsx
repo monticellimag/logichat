@@ -7,6 +7,7 @@ export default function PrepostoDashboard() {
   const [disposizioni, setDisposizioni] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState<"disposizioni" | "foto">("disposizioni");
   const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
 
   const fetchAllData = useCallback(async () => {
     try {
@@ -41,6 +42,22 @@ export default function PrepostoDashboard() {
 
   // Ordina per data decrescente
   allPhotos.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+
+  // Filtra per ricerca
+  const filteredDisposizioni = disposizioni.filter((d) => {
+    if (!searchTerm.trim()) return true;
+    const term = searchTerm.toLowerCase().trim();
+    return d.codice.toLowerCase().includes(term) || d.descrizione.toLowerCase().includes(term);
+  });
+
+  const filteredPhotos = allPhotos.filter((f) => {
+    if (!searchTerm.trim()) return true;
+    const term = searchTerm.toLowerCase().trim();
+    return (
+      (f.codiceDisposizione && f.codiceDisposizione.toLowerCase().includes(term)) ||
+      (f.descrizione && f.descrizione.toLowerCase().includes(term))
+    );
+  });
 
   // Statistiche rapide
   const totalDisp = disposizioni.length;
@@ -102,43 +119,62 @@ export default function PrepostoDashboard() {
       {/* Main Content */}
       <div className="max-w-6xl mx-auto relative z-10">
         
-        {/* Navigation Tabs */}
-        <div className="flex border-b border-slate-200 mb-6 gap-6 relative z-10">
-          <button
-            onClick={() => setActiveTab("disposizioni")}
-            className={`pb-3 text-xs font-extrabold tracking-widest transition cursor-pointer relative uppercase ${
-              activeTab === "disposizioni"
-                ? "text-slate-800"
-                : "text-slate-400 hover:text-slate-650"
-            }`}
-          >
-            Disposizioni ({pendingDisp} in attesa)
-            {activeTab === "disposizioni" && (
-              <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-slate-800 rounded-full" />
-            )}
-          </button>
-          <button
-            onClick={() => setActiveTab("foto")}
-            className={`pb-3 text-xs font-extrabold tracking-widest transition cursor-pointer relative uppercase ${
-              activeTab === "foto"
-                ? "text-slate-800"
-                : "text-slate-400 hover:text-slate-650"
-            }`}
-          >
-            Foto Magazzino ({pendingPhotos} in attesa)
-            {activeTab === "foto" && (
-              <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-slate-800 rounded-full" />
-            )}
-          </button>
+        {/* Navigation Tabs & Search Bar */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 mb-6 relative z-10 pb-1">
+          <div className="flex gap-6">
+            <button
+              onClick={() => {
+                setActiveTab("disposizioni");
+                setSearchTerm("");
+              }}
+              className={`pb-3 text-xs font-extrabold tracking-widest transition cursor-pointer relative uppercase ${
+                activeTab === "disposizioni"
+                  ? "text-slate-800"
+                  : "text-slate-400 hover:text-slate-650"
+              }`}
+            >
+              Disposizioni ({pendingDisp} in attesa)
+              {activeTab === "disposizioni" && (
+                <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-slate-800 rounded-full" />
+              )}
+            </button>
+            <button
+              onClick={() => {
+                setActiveTab("foto");
+                setSearchTerm("");
+              }}
+              className={`pb-3 text-xs font-extrabold tracking-widest transition cursor-pointer relative uppercase ${
+                activeTab === "foto"
+                  ? "text-slate-800"
+                  : "text-slate-400 hover:text-slate-650"
+              }`}
+            >
+              Foto Magazzino ({pendingPhotos} in attesa)
+              {activeTab === "foto" && (
+                <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-slate-800 rounded-full" />
+              )}
+            </button>
+          </div>
+
+          <div className="relative w-full sm:w-64 pb-2 sm:pb-0">
+            <input
+              type="text"
+              placeholder={activeTab === "disposizioni" ? "Cerca codice o istruzione..." : "Cerca codice o didascalia..."}
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full bg-white border border-slate-200 focus:border-slate-400 rounded-xl pl-9 pr-4 py-2 text-xs text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-400 transition-all shadow-sm"
+            />
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs">🔍</span>
+          </div>
         </div>
 
         {/* tab Content */}
         {activeTab === "disposizioni" ? (
           <div className="space-y-4">
-            {disposizioni.length === 0 ? (
-              <p className="text-xs text-slate-400 py-12 text-center font-sans bg-white border border-slate-200 rounded-2xl shadow-sm">Nessuna disposizione nel registro.</p>
+            {filteredDisposizioni.length === 0 ? (
+              <p className="text-xs text-slate-400 py-12 text-center font-sans bg-white border border-slate-200 rounded-2xl shadow-sm">Nessuna disposizione trovata.</p>
             ) : (
-              disposizioni.map((disp) => {
+              filteredDisposizioni.map((disp) => {
                 const statusStyles: Record<string, string> = {
                   in_attesa: "bg-amber-50 border-amber-250 text-amber-700 rounded-full",
                   approvato: "bg-emerald-50 border-emerald-250 text-emerald-700 rounded-full",
@@ -186,10 +222,10 @@ export default function PrepostoDashboard() {
           </div>
         ) : (
           <div className="space-y-4">
-            {allPhotos.length === 0 ? (
-              <p className="text-xs text-slate-400 py-12 text-center font-sans bg-white border border-slate-200 rounded-2xl shadow-sm">Nessuna foto nel registro.</p>
+            {filteredPhotos.length === 0 ? (
+              <p className="text-xs text-slate-400 py-12 text-center font-sans bg-white border border-slate-200 rounded-2xl shadow-sm">Nessuna foto trovata.</p>
             ) : (
-              allPhotos.map((foto) => {
+              filteredPhotos.map((foto) => {
                 const statusStyles: Record<string, string> = {
                   in_attesa: "bg-amber-50 border-amber-250 text-amber-700 rounded-full",
                   approvato: "bg-emerald-50 border-emerald-250 text-emerald-700 rounded-full",
