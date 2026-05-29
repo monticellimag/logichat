@@ -312,6 +312,11 @@ export default function MagazzinoPage() {
                           {new Date(f.created_at).toLocaleDateString("it-IT", { day: "2-digit", month: "2-digit" })}
                         </span>
                       </div>
+                      {f.decisione_da && (
+                        <p className="text-[9px] text-slate-500 font-sans">
+                          👤 {f.stato === "approvato" ? "Approvata" : f.stato === "rifiutato" ? "Rifiutata" : "Gestita"} da: <strong className="text-slate-700 font-bold">{f.decisione_da}</strong>
+                        </p>
+                      )}
                       {(f as any).disposizioni ? (
                         <p className="text-[9px] text-slate-500 font-mono truncate">
                           🔗 {(f as any).disposizioni.codice}
