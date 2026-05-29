@@ -15,3 +15,13 @@ updated: 2026-05-29
   - Validate this key on the server-side Next.js API endpoints to reject unauthorized requests.
   - Sincronizzare la memorizzazione della sessione tramite LocalStorage o cookie cifrato.
 - **Timing:** Planned for a future implementation phase.
+
+## LOG1 Auto-Forward to Telegram Groups
+- **Decision:** Allow forwarding information automatically to Telegram groups without Preposto manual approval.
+- **Chosen Option:** **Option A (Auto-Inoltro Diretto)**.
+- **Details:** 
+  - Save dispositions directly in `'approvato'` state in Supabase.
+  - Automatically record `approvato_da` as `"Suki & Harman"`.
+  - Instantly forward message text and media/allegati to the target Telegram channels without interactive buttons.
+- **Timing:** Planned for a future implementation phase.
+

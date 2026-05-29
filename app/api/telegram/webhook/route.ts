@@ -13,7 +13,7 @@ const TELEGRAM_PRIORITA_CHANNEL_ID = process.env.TELEGRAM_PRIORITA_CHANNEL_ID;
  */
 function getPrepostoName(chatId: string) {
   if (chatId === PREPOSTO_1_CHAT_ID) return "Preposto 1";
-  if (chatId === PREPOSTO_2_CHAT_ID) return "Preposto 2";
+  if (chatId === PREPOSTO_2_CHAT_ID) return "Suki & Harman";
   return "Preposto Sconosciuto";
 }
 

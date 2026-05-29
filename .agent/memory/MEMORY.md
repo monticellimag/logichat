@@ -7,3 +7,4 @@
 
 ## Project
 - [project] LOG1 Auth: Option A (Shared Password/PIN Key) chosen for future security implementation → tech-decisions.md
+- [project] LOG1 Auto-Forward: Option A (Auto-Inoltro) chosen for future Telegram bypass implementation → tech-decisions.md
