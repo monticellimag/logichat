@@ -11,6 +11,9 @@ export default function MagazzinoPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
 
+  // Stato per dividere la sezione Oggi dall'Archivio Storico
+  const [activeSection, setActiveSection] = useState<"oggi" | "archivio">("oggi");
+
   // ── Fetch ──
   const fetchDisposizioni = useCallback(async () => {
     try {
@@ -39,8 +42,45 @@ export default function MagazzinoPage() {
     return () => clearInterval(id);
   }, [fetchDisposizioni, fetchFoto]);
 
-  // ── Derivati ──
-  const fotoFiltrate = foto.filter((f) => {
+  // Helper per verificare se una data corrisponde ad oggi
+  const isToday = (dateString: string | null) => {
+    if (!dateString) return false;
+    const date = new Date(dateString);
+    const today = new Date();
+    return (
+      date.getDate() === today.getDate() &&
+      date.getMonth() === today.getMonth() &&
+      date.getFullYear() === today.getFullYear()
+    );
+  };
+
+  const handleArchive = async (id: string) => {
+    if (!confirm("Sei sicuro di voler archiviare questa disposizione? Verrà spostata all'istante nello storico.")) return;
+    try {
+      const res = await fetch(`/api/disposizioni/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ archiviato: true }),
+      });
+      if (!res.ok) throw new Error("Errore durante l'archiviazione");
+      fetchDisposizioni();
+    } catch (err) {
+      alert("Impossibile archiviare la disposizione");
+    }
+  };
+
+  // Divisione dei dati tra Oggi e Archivio Storico
+  const disposizioniOggi = disposizioni.filter(d => (isToday(d.created_at) || isToday(d.decisione_data)) && !d.archiviato);
+  const disposizioniArchivio = disposizioni.filter(d => (!isToday(d.created_at) && !isToday(d.decisione_data)) || d.archiviato);
+
+  const fotoOggi = foto.filter(f => isToday(f.created_at));
+  const fotoArchivio = foto.filter(f => !isToday(f.created_at));
+
+  const activeDisposizioniSet = activeSection === "oggi" ? disposizioniOggi : disposizioniArchivio;
+  const activeFotoSet = activeSection === "oggi" ? fotoOggi : fotoArchivio;
+
+  // ── Derivati Filtrati ──
+  const fotoFiltrate = activeFotoSet.filter((f) => {
     if (fotoTab === "approvate" && f.stato !== "approvato") return false;
     if (fotoTab === "in_attesa" && f.stato !== "in_attesa") return false;
     
@@ -53,7 +93,7 @@ export default function MagazzinoPage() {
     return true;
   });
 
-  const disposizioniFiltrate = disposizioni.filter(d => {
+  const disposizioniFiltrate = activeDisposizioniSet.filter(d => {
     if (searchTerm) {
       const s = searchTerm.toLowerCase();
       return d.codice.toLowerCase().includes(s) || d.descrizione.toLowerCase().includes(s);
@@ -116,6 +156,32 @@ export default function MagazzinoPage() {
           </div>
         </header>
 
+        {/* ── SEZIONE ATTIVA SWITCHER (OGGI vs ARCHIVIO) ───────────────────── */}
+        <div className="flex border-b border-slate-200 p-1 bg-slate-200/50 rounded-2xl max-w-md mx-auto shadow-sm">
+          <button
+            type="button"
+            onClick={() => setActiveSection("oggi")}
+            className={`flex-1 py-3 px-6 text-xs font-black uppercase tracking-widest rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2 ${
+              activeSection === "oggi"
+                ? "bg-white text-slate-950 shadow-sm"
+                : "text-slate-500 hover:text-slate-800"
+            }`}
+          >
+            <span>⏳</span> Oggi ({disposizioniOggi.length + fotoOggi.length})
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveSection("archivio")}
+            className={`flex-1 py-3 px-6 text-xs font-black uppercase tracking-widest rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2 ${
+              activeSection === "archivio"
+                ? "bg-white text-slate-950 shadow-sm"
+                : "text-slate-500 hover:text-slate-800"
+            }`}
+          >
+            <span>🗄️</span> Archivio ({disposizioniArchivio.length + fotoArchivio.length})
+          </button>
+        </div>
+
         {/* ── MAIN TWO-COLUMN BENTO LAYOUT ─────────────────────────────────── */}
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 items-start">
 
@@ -124,14 +190,16 @@ export default function MagazzinoPage() {
             <div className="flex items-center min-h-[40px]">
               <h2 className="text-xs font-bold text-slate-800 flex items-center gap-2 uppercase tracking-widest">
                 <span className="w-1.5 h-4 bg-slate-500 rounded-full inline-block" />
-                Disposizioni Attive ({disposizioniFiltrate.length})
+                {activeSection === "oggi" ? "Disposizioni di Oggi" : "Disposizioni Archiviate"} ({disposizioniFiltrate.length})
               </h2>
             </div>
 
             {disposizioniFiltrate.length === 0 ? (
               <div className="bg-white border border-slate-200 p-8 rounded-2xl shadow-sm text-center text-slate-450 font-sans leading-relaxed">
                 <span className="text-2xl block mb-1">📋</span>
-                Nessun risultato trovato.
+                {activeSection === "oggi" 
+                  ? "Nessuna disposizione attiva per oggi. Crea una disposizione da LOG1 per iniziare."
+                  : "Nessuna disposizione archiviata nei giorni precedenti."}
               </div>
             ) : (
               <div className="space-y-3">
@@ -156,6 +224,16 @@ export default function MagazzinoPage() {
                     <div className="bg-slate-50 border border-slate-100 rounded-xl p-3 text-[10px] text-slate-500 font-sans leading-relaxed">
                       💡 <strong>Per magazzinieri:</strong> Invia la foto al Bot Telegram scrivendo <code>{d.codice}</code> come commento del post.
                     </div>
+                    {activeSection === "oggi" && (
+                      <div className="flex justify-end pt-1">
+                        <button
+                          onClick={() => handleArchive(d.id)}
+                          className="text-[10px] text-slate-500 hover:text-slate-850 underline font-bold uppercase tracking-widest cursor-pointer flex items-center gap-1"
+                        >
+                          📁 Archivia Disposizione
+                        </button>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
@@ -167,7 +245,7 @@ export default function MagazzinoPage() {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 min-h-[40px]">
               <h2 className="text-xs font-bold text-slate-800 flex items-center gap-2 uppercase tracking-widest">
                 <span className="w-1.5 h-4 bg-slate-400 rounded-full inline-block" />
-                Foto Ricevute ({fotoFiltrate.length})
+                {activeSection === "oggi" ? "Foto di Oggi" : "Foto Archiviate"} ({fotoFiltrate.length})
               </h2>
 
               {/* Tab filtro */}
@@ -195,7 +273,9 @@ export default function MagazzinoPage() {
                   ? "Nessuna foto in attesa."
                   : fotoTab === "approvate"
                   ? "Nessuna foto ancora approvata."
-                  : "Nessuna foto ricevuta. Invia una foto con il codice della disposizione al Bot Telegram."}
+                  : activeSection === "oggi"
+                  ? "Nessuna foto ricevuta oggi. Invia una foto con il codice della disposizione al Bot Telegram."
+                  : "Nessuna foto archiviata nei giorni precedenti."}
               </div>
             ) : (
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">

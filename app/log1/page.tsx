@@ -15,7 +15,7 @@ export default function Log1Dashboard() {
   const [successMsg, setSuccessMsg] = useState("");
 
   // Stati per la gestione della sezione Archivio e filtri avanzati
-  const [activeSection, setActiveSection] = useState<"attesa" | "archivio">("attesa");
+  const [activeSection, setActiveSection] = useState<"corso" | "archivio">("corso");
   const [filterTipologia, setFilterTipologia] = useState("tutti");
   const [filterStato, setFilterStato] = useState("tutti");
 
@@ -91,6 +91,22 @@ export default function Log1Dashboard() {
     }
   };
 
+  const handleArchive = async (id: string) => {
+    if (!confirm("Sei sicuro di voler archiviare questa disposizione? Verrà spostata all'istante nello storico.")) return;
+    try {
+      const res = await fetch(`/api/disposizioni/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ archiviato: true }),
+      });
+      if (!res.ok) throw new Error("Errore durante l'archiviazione");
+      fetchDisposizioni();
+    } catch (err) {
+      alert("Impossibile archiviare la disposizione");
+    }
+  };
+
+
   const statusStyle: Record<string, { bar: string; badge: string; label: string }> = {
     in_attesa: {
       bar: "bg-amber-400",
@@ -129,10 +145,24 @@ export default function Log1Dashboard() {
     }
   };
 
+  // Helper per verificare se una data corrisponde ad oggi
+  const isToday = (dateString: string | null) => {
+    if (!dateString) return false;
+    const date = new Date(dateString);
+    const today = new Date();
+    return (
+      date.getDate() === today.getDate() &&
+      date.getMonth() === today.getMonth() &&
+      date.getFullYear() === today.getFullYear()
+    );
+  };
+
+  const disposizioniCorso = disposizioni.filter(d => isToday(d.created_at) && !d.archiviato);
+  const disposizioniArchivio = disposizioni.filter(d => !isToday(d.created_at) || d.archiviato);
+
   const counts = {
-    in_attesa: disposizioni.filter((d) => d.stato === "in_attesa").length,
-    approvato: disposizioni.filter((d) => d.stato === "approvato").length,
-    rifiutato: disposizioni.filter((d) => d.stato === "rifiutato").length,
+    corso: disposizioniCorso.length,
+    archivio: disposizioniArchivio.length,
   };
 
   const displayedDisposizioni = disposizioni.filter((d) => {
@@ -144,19 +174,16 @@ export default function Log1Dashboard() {
     if (!matchesSearch) return false;
 
     // 2. Tab Section Filter
-    if (activeSection === "attesa") {
-      return d.stato === "in_attesa";
-    } else {
-      // activeSection === "archivio"
-      const matchesStatusTab = d.stato === "approvato" || d.stato === "rifiutato";
-      if (!matchesStatusTab) return false;
+    const matchesSection = activeSection === "corso" 
+      ? (isToday(d.created_at) && !d.archiviato) 
+      : (!isToday(d.created_at) || d.archiviato);
+    if (!matchesSection) return false;
 
-      // 2a. Advanced Filters inside Archive
-      const matchesTipologia = filterTipologia === "tutti" || d.tipologia === filterTipologia;
-      const matchesStato = filterStato === "tutti" || d.stato === filterStato;
+    // 3. Advanced Category & Status Filters (active on both tabs!)
+    const matchesTipologia = filterTipologia === "tutti" || d.tipologia === filterTipologia;
+    const matchesStato = filterStato === "tutti" || d.stato === filterStato;
 
-      return matchesTipologia && matchesStato;
-    }
+    return matchesTipologia && matchesStato;
   });
 
   return (
@@ -185,20 +212,6 @@ export default function Log1Dashboard() {
             <span className="text-[10px] text-slate-600 font-bold uppercase tracking-widest">Live</span>
           </div>
         </header>
-
-        {/* ── KPI strip ────────────────────────────────────────────────────── */}
-        <div className="grid grid-cols-3 gap-4 mb-10">
-          {[
-            { label: "In Attesa", value: counts.in_attesa, color: "text-amber-700 bg-amber-50/60 border-amber-200" },
-            { label: "Approvate", value: counts.approvato, color: "text-emerald-700 bg-emerald-50/60 border-emerald-250" },
-            { label: "Rifiutate", value: counts.rifiutato, color: "text-rose-700 bg-rose-50/60 border-rose-250" },
-          ].map((k) => (
-            <div key={k.label} className={`bg-white border ${k.color.split(" ").slice(1).join(" ")} p-5 rounded-2xl shadow-sm shadow-slate-100/40 text-center flex flex-col justify-center items-center`}>
-              <div className={`text-3xl font-black ${k.color.split(" ")[0]}`}>{k.value}</div>
-              <div className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-2">{k.label}</div>
-            </div>
-          ))}
-        </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
 
@@ -321,18 +334,18 @@ export default function Log1Dashboard() {
 
           {/* ── STORICO (3/5) ────────────────────────────────────────────── */}
           <section className="lg:col-span-3 space-y-3">
-            {/* Switcer a schede per dividere Storico Attivo da Archivio Storico */}
+            {/* Switcher a schede per dividere Storico Attivo da Archivio Storico */}
             <div className="flex border-b border-slate-200 mb-6 p-1 bg-slate-200/50 rounded-xl">
               <button
                 type="button"
-                onClick={() => setActiveSection("attesa")}
+                onClick={() => setActiveSection("corso")}
                 className={`flex-1 py-2 px-3 text-[10px] font-bold uppercase tracking-widest rounded-lg transition-all cursor-pointer ${
-                  activeSection === "attesa"
+                  activeSection === "corso"
                     ? "bg-white text-slate-950 shadow-sm"
                     : "text-slate-500 hover:text-slate-800"
                 }`}
               >
-                ⏳ In Attesa ({counts.in_attesa})
+                ⏳ In Corso ({counts.corso})
               </button>
               <button
                 type="button"
@@ -343,14 +356,14 @@ export default function Log1Dashboard() {
                     : "text-slate-500 hover:text-slate-800"
                 }`}
               >
-                🗄️ Archivio Storico ({counts.approvato + counts.rifiutato})
+                🗄️ Archivio Storico ({counts.archivio})
               </button>
             </div>
 
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
               <h2 className="text-xs font-bold text-slate-800 flex items-center gap-2 uppercase tracking-widest">
                 <span className="w-1.5 h-4 bg-slate-400 rounded-full inline-block" />
-                {activeSection === "attesa" ? "Disposizioni in Attesa" : "Archivio Pratiche"} ({displayedDisposizioni.length})
+                {activeSection === "corso" ? "Disposizioni In Corso" : "Archivio Pratiche"} ({displayedDisposizioni.length})
               </h2>
               <div className="relative w-full sm:w-64">
                 <input
@@ -364,8 +377,8 @@ export default function Log1Dashboard() {
               </div>
             </div>
 
-            {/* Pannello filtri avanzati per la sezione Archivio */}
-            {activeSection === "archivio" && (
+            {/* Pannello filtri avanzati per entrambe le sezioni (In Corso ed Archivio) */}
+            {(activeSection === "corso" || activeSection === "archivio") && (
               <div className="bg-white border border-slate-200 p-4 rounded-2xl shadow-sm shadow-slate-100/50 mb-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">
@@ -394,6 +407,7 @@ export default function Log1Dashboard() {
                     <option value="tutti">📊 Tutti gli Stati</option>
                     <option value="approvato">✅ Solo Approvate</option>
                     <option value="rifiutato">❌ Solo Rifiutate</option>
+                    <option value="in_attesa">⏳ Solo In Attesa</option>
                   </select>
                 </div>
               </div>
@@ -467,14 +481,24 @@ export default function Log1Dashboard() {
                         <span className={`shrink-0 text-[10px] font-bold px-3 py-1 border rounded-full ${s.badge} uppercase tracking-wider`}>
                           {s.label}
                         </span>
-                        {d.stato === "in_attesa" && (
-                          <button
-                            onClick={() => handleCancel(d.id)}
-                            className="text-[10px] text-rose-500 hover:text-rose-700 underline font-bold uppercase tracking-widest mt-1 cursor-pointer"
-                          >
-                            Annulla
-                          </button>
-                        )}
+                        <div className="flex flex-col items-end gap-1.5 mt-1">
+                          {d.stato === "in_attesa" && (
+                            <button
+                              onClick={() => handleCancel(d.id)}
+                              className="text-[10px] text-rose-500 hover:text-rose-700 underline font-bold uppercase tracking-widest cursor-pointer"
+                            >
+                              Annulla
+                            </button>
+                          )}
+                          {activeSection === "corso" && (
+                            <button
+                              onClick={() => handleArchive(d.id)}
+                              className="text-[10px] text-slate-500 hover:text-slate-850 underline font-bold uppercase tracking-widest cursor-pointer"
+                            >
+                              📁 Archivia
+                            </button>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>
