@@ -34,17 +34,76 @@ export async function GET() {
  */
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
-    const { codice, descrizione } = body;
+    let codice = "";
+    let descrizione = "";
+    let tipologia = "generica";
+    let allegatoFile: File | null = null;
+    let allegatoUrl: string | null = null;
+    let allegatoName: string | null = null;
+
+    const contentType = request.headers.get("content-type") || "";
+
+    if (contentType.includes("multipart/form-data")) {
+      const formData = await request.formData();
+      codice = formData.get("codice") as string || "";
+      descrizione = formData.get("descrizione") as string || "";
+      tipologia = formData.get("tipologia") as string || "generica";
+      const file = formData.get("allegato") as File | null;
+      if (file && file.size > 0) {
+        allegatoFile = file;
+        allegatoName = file.name;
+      }
+    } else {
+      const body = await request.json();
+      codice = body.codice || "";
+      descrizione = body.descrizione || "";
+      tipologia = body.tipologia || "generica";
+    }
 
     if (!codice || !descrizione) {
       return NextResponse.json({ error: "Codice e descrizione sono obbligatori" }, { status: 400 });
     }
 
-    // 1. Salva la disposizione su Supabase in stato 'in_attesa'
+    // 1. Se c'è un file allegato, caricalo in Supabase Storage
+    if (allegatoFile) {
+      const fileExt = allegatoName?.split(".").pop() || "bin";
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 8)}.${fileExt}`;
+      const filePath = `disposizioni/${fileName}`;
+
+      // Converti File in ArrayBuffer e quindi in Buffer per l'upload
+      const fileBuffer = Buffer.from(await allegatoFile.arrayBuffer());
+
+      const { data: uploadData, error: uploadError } = await supabaseAdmin.storage
+        .from("allegati")
+        .upload(filePath, fileBuffer, {
+          contentType: allegatoFile.type,
+          upsert: true
+        });
+
+      if (uploadError) {
+        console.error("Errore caricamento storage:", uploadError.message);
+        return NextResponse.json({ error: `Errore caricamento allegato: ${uploadError.message}` }, { status: 500 });
+      }
+
+      // Ricava l'URL pubblico
+      const { data: publicUrlData } = supabaseAdmin.storage
+        .from("allegati")
+        .getPublicUrl(filePath);
+
+      allegatoUrl = publicUrlData.publicUrl;
+    }
+
+    // 2. Salva la disposizione su Supabase in stato 'in_attesa'
     const { data: disposizione, error } = await supabaseAdmin
       .from("disposizioni")
-      .insert([{ codice, descrizione, stato: "in_attesa" }])
+      .insert([{ 
+        codice, 
+        descrizione, 
+        stato: "in_attesa",
+        allegato_url: allegatoUrl,
+        allegato_name: allegatoName,
+        tipologia: tipologia
+      }])
       .select()
       .single();
 
@@ -52,7 +111,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    // 2. Prepara la tastiera inline con i pulsanti Approva / Rifiuta
+    // 3. Prepara la tastiera inline con i pulsanti Approva / Rifiuta
     const inlineKeyboard = {
       inline_keyboard: [
         [
@@ -68,21 +127,45 @@ export async function POST(request: Request) {
       ],
     };
 
-    const messageText = `📦 *Nuova disposizione da LOG1*
+    const tipologiaLabels: Record<string, string> = {
+      carico: "🔵 CARICO",
+      scarico: "🟢 SCARICO",
+      priorita: "🚨 PRIORITÀ",
+      generica: "📦 GENERICA"
+    };
+    const flowLabel = tipologiaLabels[tipologia] || tipologiaLabels.generica;
+
+    let messageText = `📦 *Nuova disposizione da LOG1* [${flowLabel}]
     
 *Codice:* \`${codice}\`
-*Descrizione:* ${descrizione}
+*Descrizione:* ${descrizione}`;
 
-Stato attuale: ⏳ In attesa di approvazione.`;
+    if (allegatoUrl) {
+      messageText += `\n📎 *Allegato:* [${allegatoName || "Visualizza file"}](${allegatoUrl})`;
+    }
 
-    // 3. Notifica entrambi i Preposti via Telegram
-    const notificationPromises = prepostiChatIds.map((chatId) =>
-      telegramClient.sendMessage(chatId, messageText, inlineKeyboard)
-        .catch((err) => {
-          console.error(`Errore nell'invio della notifica al Preposto (${chatId}):`, err);
-          return null;
-        })
-    );
+    messageText += `\n\nStato attuale: ⏳ In attesa di approvazione.`;
+
+    // 4. Notifica entrambi i Preposti via Telegram
+    const notificationPromises = prepostiChatIds.map(async (chatId) => {
+      try {
+        if (allegatoUrl) {
+          const fileLower = (allegatoName || "").toLowerCase();
+          const isImage = fileLower.endsWith(".png") || fileLower.endsWith(".jpg") || fileLower.endsWith(".jpeg") || fileLower.endsWith(".gif") || fileLower.endsWith(".webp");
+          
+          if (isImage) {
+            return await telegramClient.sendPhoto(chatId, allegatoUrl, messageText, inlineKeyboard);
+          } else {
+            return await telegramClient.sendDocument(chatId, allegatoUrl, messageText, inlineKeyboard);
+          }
+        } else {
+          return await telegramClient.sendMessage(chatId, messageText, inlineKeyboard);
+        }
+      } catch (err) {
+        console.error(`Errore nell'invio della notifica al Preposto (${chatId}):`, err);
+        return null;
+      }
+    });
 
     await Promise.all(notificationPromises);
 

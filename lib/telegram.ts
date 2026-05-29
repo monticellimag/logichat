@@ -113,6 +113,64 @@ export const telegramClient = {
   },
 
   /**
+   * Invia un documento a un chat_id specifico. Supporta sia un URL/file_id che un caricamento diretto
+   */
+  async sendDocument(
+    chatId: string | number,
+    document: string | Buffer,
+    caption?: string,
+    replyMarkup?: InlineKeyboardMarkup
+  ) {
+    const url = `${BASE_URL}/sendDocument`;
+
+    if (typeof document === "string") {
+      const body: Record<string, any> = {
+        chat_id: chatId,
+        document,
+        parse_mode: "Markdown",
+      };
+
+      if (caption) body.caption = caption;
+      if (replyMarkup) body.reply_markup = replyMarkup;
+
+      const response = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Telegram sendDocument failed: ${response.statusText} - ${errorText}`);
+      }
+
+      return response.json();
+    } else {
+      const formData = new FormData();
+      formData.append("chat_id", String(chatId));
+      
+      const blob = new Blob([document as any], { type: "application/octet-stream" });
+      formData.append("document", blob, "document.dat");
+
+      if (caption) formData.append("caption", caption);
+      if (replyMarkup) formData.append("reply_markup", JSON.stringify(replyMarkup));
+      formData.append("parse_mode", "Markdown");
+
+      const response = await fetch(url, {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Telegram sendDocument (binary) failed: ${response.statusText} - ${errorText}`);
+      }
+
+      return response.json();
+    }
+  },
+
+  /**
    * Risponde a una Callback Query proveniente dal click su un bottone inline
    */
   async answerCallbackQuery(callbackQueryId: string, text?: string, showAlert = false) {
@@ -171,6 +229,41 @@ export const telegramClient = {
     if (!response.ok) {
       const errorText = await response.text();
       throw new Error(`Telegram editMessageText failed: ${response.statusText} - ${errorText}`);
+    }
+
+    return response.json();
+  },
+
+  /**
+   * Modifica la didascalia (caption) di un messaggio con media (foto/documento) esistente
+   */
+  async editMessageCaption(
+    chatId: string | number,
+    messageId: number,
+    caption: string,
+    replyMarkup?: InlineKeyboardMarkup
+  ) {
+    const url = `${BASE_URL}/editMessageCaption`;
+    const body: Record<string, any> = {
+      chat_id: chatId,
+      message_id: messageId,
+      caption,
+      parse_mode: "Markdown",
+    };
+
+    if (replyMarkup) {
+      body.reply_markup = replyMarkup;
+    }
+
+    const response = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Telegram editMessageCaption failed: ${response.statusText} - ${errorText}`);
     }
 
     return response.json();

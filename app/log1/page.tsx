@@ -7,10 +7,17 @@ export default function Log1Dashboard() {
   const [disposizioni, setDisposizioni] = useState<any[]>([]);
   const [codice, setCodice] = useState("");
   const [descrizione, setDescrizione] = useState("");
+  const [tipologia, setTipologia] = useState("carico");
+  const [allegato, setAllegato] = useState<File | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(false);
   const [submitError, setSubmitError] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
+
+  // Stati per la gestione della sezione Archivio e filtri avanzati
+  const [activeSection, setActiveSection] = useState<"attesa" | "archivio">("attesa");
+  const [filterTipologia, setFilterTipologia] = useState("tutti");
+  const [filterStato, setFilterStato] = useState("tutti");
 
   const fetchDisposizioni = useCallback(async () => {
     try {
@@ -41,10 +48,17 @@ export default function Log1Dashboard() {
     }
 
     try {
+      const formData = new FormData();
+      formData.append("codice", codice.trim());
+      formData.append("descrizione", descrizione.trim());
+      formData.append("tipologia", tipologia);
+      if (allegato) {
+        formData.append("allegato", allegato);
+      }
+
       const res = await fetch("/api/disposizioni", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ codice: codice.trim(), descrizione: descrizione.trim() }),
+        body: formData,
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Errore invio");
@@ -52,6 +66,12 @@ export default function Log1Dashboard() {
       setSuccessMsg(`Disposizione "${codice.trim()}" inviata al Preposto.`);
       setCodice("");
       setDescrizione("");
+      setTipologia("carico");
+      setAllegato(null);
+
+      const fileInput = document.getElementById("file-input") as HTMLInputElement;
+      if (fileInput) fileInput.value = "";
+
       fetchDisposizioni();
     } catch (err: any) {
       setSubmitError(err.message);
@@ -89,16 +109,55 @@ export default function Log1Dashboard() {
     },
   };
 
+  const tipologiaStyle: Record<string, { badge: string; label: string; dot?: string }> = {
+    carico: {
+      badge: "bg-blue-50 border-blue-200 text-blue-700",
+      label: "🔵 Carico",
+    },
+    scarico: {
+      badge: "bg-emerald-50 border-emerald-200 text-emerald-700",
+      label: "🟢 Scarico",
+    },
+    priorita: {
+      badge: "bg-rose-50 border-rose-200 text-rose-700 animate-pulse",
+      label: "🚨 Priorità",
+      dot: "w-1.5 h-1.5 rounded-full bg-rose-500 animate-ping absolute -top-0.5 -right-0.5"
+    },
+    generica: {
+      badge: "bg-slate-50 border-slate-200 text-slate-600",
+      label: "📦 Generica",
+    }
+  };
+
   const counts = {
     in_attesa: disposizioni.filter((d) => d.stato === "in_attesa").length,
     approvato: disposizioni.filter((d) => d.stato === "approvato").length,
     rifiutato: disposizioni.filter((d) => d.stato === "rifiutato").length,
   };
 
-  const filteredDisposizioni = disposizioni.filter((d) =>
-    d.codice.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    d.descrizione.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const displayedDisposizioni = disposizioni.filter((d) => {
+    // 1. Text Search Filter (always active)
+    const matchesSearch =
+      d.codice.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      d.descrizione.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    if (!matchesSearch) return false;
+
+    // 2. Tab Section Filter
+    if (activeSection === "attesa") {
+      return d.stato === "in_attesa";
+    } else {
+      // activeSection === "archivio"
+      const matchesStatusTab = d.stato === "approvato" || d.stato === "rifiutato";
+      if (!matchesStatusTab) return false;
+
+      // 2a. Advanced Filters inside Archive
+      const matchesTipologia = filterTipologia === "tutti" || d.tipologia === filterTipologia;
+      const matchesStato = filterStato === "tutti" || d.stato === filterStato;
+
+      return matchesTipologia && matchesStato;
+    }
+  });
 
   return (
     <main className="min-h-screen bg-slate-50 text-slate-800 relative overflow-hidden pb-12">
@@ -168,6 +227,22 @@ export default function Log1Dashboard() {
 
                 <div>
                   <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">
+                    Tipologia Flusso
+                  </label>
+                  <select
+                    value={tipologia}
+                    onChange={(e) => setTipologia(e.target.value)}
+                    disabled={loading}
+                    className="w-full bg-slate-50 border border-slate-200 focus:bg-white rounded-xl px-4 py-3 text-sm text-slate-850 focus:outline-none focus:border-slate-400 focus:ring-1 focus:ring-slate-400 transition-all font-sans cursor-pointer"
+                  >
+                    <option value="carico">🔵 Carico Camion</option>
+                    <option value="scarico">🟢 Scarico Camion</option>
+                    <option value="priorita">🚨 PRIORITÀ (Urgenza)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">
                     Istruzione
                   </label>
                   <textarea
@@ -178,6 +253,44 @@ export default function Log1Dashboard() {
                     disabled={loading}
                     className="w-full bg-slate-50 border border-slate-200 focus:bg-white rounded-xl px-4 py-3 text-sm text-slate-850 placeholder-slate-350 focus:outline-none focus:border-slate-400 focus:ring-1 focus:ring-slate-400 transition-all resize-none font-sans"
                   />
+                </div>
+
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">
+                    Allegato (Opzionale)
+                  </label>
+                  <div className="relative flex items-center justify-center w-full">
+                    <label className="flex flex-col items-center justify-center w-full h-24 border-2 border-slate-200 border-dashed rounded-xl cursor-pointer bg-slate-50 hover:bg-slate-100 hover:border-slate-300 transition-all">
+                      <div className="flex flex-col items-center justify-center pt-3 pb-3">
+                        <span className="text-xl mb-1">📎</span>
+                        <p className="text-xs text-slate-500 font-medium px-4 text-center truncate w-full">
+                          {allegato ? allegato.name : "Carica un file (Foto, PDF, ecc.)"}
+                        </p>
+                        <p className="text-[9px] text-slate-400 mt-0.5">
+                          {allegato ? `${(allegato.size / 1024 / 1024).toFixed(2)} MB` : "Dimensione massima: 10MB"}
+                        </p>
+                      </div>
+                      <input
+                        id="file-input"
+                        type="file"
+                        className="hidden"
+                        disabled={loading}
+                        onChange={(e) => {
+                          const file = e.target.files?.[0] || null;
+                          setAllegato(file);
+                        }}
+                      />
+                    </label>
+                  </div>
+                  {allegato && (
+                    <button
+                      type="button"
+                      onClick={() => setAllegato(null)}
+                      className="text-[9px] text-rose-500 hover:text-rose-700 font-bold uppercase tracking-widest mt-1.5 inline-block cursor-pointer"
+                    >
+                      Rimuovi Allegato
+                    </button>
+                  )}
                 </div>
 
                 {submitError && (
@@ -208,10 +321,36 @@ export default function Log1Dashboard() {
 
           {/* ── STORICO (3/5) ────────────────────────────────────────────── */}
           <section className="lg:col-span-3 space-y-3">
+            {/* Switcer a schede per dividere Storico Attivo da Archivio Storico */}
+            <div className="flex border-b border-slate-200 mb-6 p-1 bg-slate-200/50 rounded-xl">
+              <button
+                type="button"
+                onClick={() => setActiveSection("attesa")}
+                className={`flex-1 py-2 px-3 text-[10px] font-bold uppercase tracking-widest rounded-lg transition-all cursor-pointer ${
+                  activeSection === "attesa"
+                    ? "bg-white text-slate-950 shadow-sm"
+                    : "text-slate-500 hover:text-slate-800"
+                }`}
+              >
+                ⏳ In Attesa ({counts.in_attesa})
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveSection("archivio")}
+                className={`flex-1 py-2 px-3 text-[10px] font-bold uppercase tracking-widest rounded-lg transition-all cursor-pointer ${
+                  activeSection === "archivio"
+                    ? "bg-white text-slate-950 shadow-sm"
+                    : "text-slate-500 hover:text-slate-800"
+                }`}
+              >
+                🗄️ Archivio Storico ({counts.approvato + counts.rifiutato})
+              </button>
+            </div>
+
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
               <h2 className="text-xs font-bold text-slate-800 flex items-center gap-2 uppercase tracking-widest">
                 <span className="w-1.5 h-4 bg-slate-400 rounded-full inline-block" />
-                Storico ({disposizioni.length})
+                {activeSection === "attesa" ? "Disposizioni in Attesa" : "Archivio Pratiche"} ({displayedDisposizioni.length})
               </h2>
               <div className="relative w-full sm:w-64">
                 <input
@@ -225,13 +364,48 @@ export default function Log1Dashboard() {
               </div>
             </div>
 
-            {filteredDisposizioni.length === 0 ? (
+            {/* Pannello filtri avanzati per la sezione Archivio */}
+            {activeSection === "archivio" && (
+              <div className="bg-white border border-slate-200 p-4 rounded-2xl shadow-sm shadow-slate-100/50 mb-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">
+                    Filtra per Tipologia
+                  </label>
+                  <select
+                    value={filterTipologia}
+                    onChange={(e) => setFilterTipologia(e.target.value)}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-750 focus:outline-none focus:border-slate-350 cursor-pointer font-sans"
+                  >
+                    <option value="tutti">📁 Tutti i flussi</option>
+                    <option value="carico">🔵 Solo Carichi</option>
+                    <option value="scarico">🟢 Solo Scarichi</option>
+                    <option value="priorita">🚨 Solo Priorità</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">
+                    Filtra per Stato
+                  </label>
+                  <select
+                    value={filterStato}
+                    onChange={(e) => setFilterStato(e.target.value)}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-750 focus:outline-none focus:border-slate-350 cursor-pointer font-sans"
+                  >
+                    <option value="tutti">📊 Tutti gli Stati</option>
+                    <option value="approvato">✅ Solo Approvate</option>
+                    <option value="rifiutato">❌ Solo Rifiutate</option>
+                  </select>
+                </div>
+              </div>
+            )}
+
+            {displayedDisposizioni.length === 0 ? (
               <div className="bg-white border border-slate-200 p-12 rounded-2xl shadow-sm text-center text-slate-450 font-sans">
                 <span className="text-3xl block mb-2">📋</span>
                 Nessun risultato trovato.
               </div>
             ) : (
-              filteredDisposizioni.map((d) => {
+              displayedDisposizioni.map((d) => {
                 const s = statusStyle[d.stato] ?? statusStyle.in_attesa;
                 return (
                   <div
@@ -242,10 +416,22 @@ export default function Log1Dashboard() {
                     <div className={`h-[3px] ${s.bar}`} />
                     <div className="px-5 py-4 flex items-start justify-between gap-4">
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-3 mb-2">
+                        <div className="flex items-center gap-3 mb-2 flex-wrap">
                           <span className="text-slate-700 font-mono text-xs font-bold bg-slate-100 border border-slate-200 rounded-lg px-2.5 py-0.5">
                             {d.codice}
                           </span>
+                          
+                          {/* Badge Colorato Categoria */}
+                          {(() => {
+                            const t = tipologiaStyle[d.tipologia] || tipologiaStyle.generica;
+                            return (
+                              <span className={`relative text-[9px] font-bold px-2 py-0.5 border rounded-md uppercase tracking-wider ${t.badge}`}>
+                                {t.label}
+                                {t.dot && <span className={t.dot} />}
+                              </span>
+                            );
+                          })()}
+
                           <span className="text-[10px] text-slate-400 font-mono">
                             {new Date(d.created_at).toLocaleString("it-IT", {
                               day: "2-digit",
@@ -258,6 +444,19 @@ export default function Log1Dashboard() {
                         <p className="text-slate-700 text-sm font-sans leading-relaxed line-clamp-2">
                           {d.descrizione}
                         </p>
+                        {d.allegato_url && (
+                          <div className="mt-2.5 flex items-center gap-1.5 text-xs">
+                            <span className="text-slate-400">📎</span>
+                            <a
+                              href={d.allegato_url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-slate-500 hover:text-slate-800 underline font-medium truncate max-w-[200px] sm:max-w-xs"
+                            >
+                              {d.allegato_name || "Visualizza Allegato"}
+                            </a>
+                          </div>
+                        )}
                         {d.approvato_da && (
                           <p className="text-[10px] text-slate-400 mt-2 font-mono">
                             👤 {d.approvato_da} · {new Date(d.decisione_data).toLocaleDateString("it-IT")}

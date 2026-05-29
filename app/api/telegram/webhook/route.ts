@@ -6,6 +6,7 @@ const PREPOSTO_1_CHAT_ID = process.env.PREPOSTO_1_CHAT_ID;
 const PREPOSTO_2_CHAT_ID = process.env.PREPOSTO_2_CHAT_ID;
 const TELEGRAM_DISPOSIZIONI_CHANNEL_ID = process.env.TELEGRAM_DISPOSIZIONI_CHANNEL_ID;
 const TELEGRAM_ARCHIVE_CHANNEL_ID = process.env.TELEGRAM_ARCHIVE_CHANNEL_ID;
+const TELEGRAM_PRIORITA_CHANNEL_ID = process.env.TELEGRAM_PRIORITA_CHANNEL_ID;
 
 /**
  * Helper per identificare quale Preposto ha cliccato in base al chat_id
@@ -188,18 +189,48 @@ Scegli come procedere:`;
         return NextResponse.json({ error: error?.message || "Record not found" }, { status: 500 });
       }
 
-      // 2. Se approvato, SMISTA la disposizione al canale delle Disposizioni
-      if (isApproval && TELEGRAM_DISPOSIZIONI_CHANNEL_ID) {
-        const operaiMessage = `📣 *NUOVA DISPOSIZIONE UFFICIALE*
+      // 2. Se approvato, SMISTA la disposizione al canale delle Disposizioni corretto
+      if (isApproval) {
+        const isPriority = disposizione.tipologia === "priorita";
+        const targetChannelId = isPriority
+          ? (TELEGRAM_PRIORITA_CHANNEL_ID || TELEGRAM_DISPOSIZIONI_CHANNEL_ID)
+          : TELEGRAM_DISPOSIZIONI_CHANNEL_ID;
+
+        if (targetChannelId) {
+          const typeEmojis: Record<string, string> = {
+            carico: "🔵 [CARICO]",
+            scarico: "🟢 [SCARICO]",
+            priorita: "🚨 [PRIORITÀ]"
+          };
+          const typeBadge = typeEmojis[disposizione.tipologia] || "";
+
+          const operaiMessage = `📣 *NUOVA DISPOSIZIONE UFFICIALE* ${typeBadge}
         
 *Codice:* \`${disposizione.codice}\`
 *Indicazione:* ${disposizione.descrizione}
+${disposizione.allegato_url ? `\n📎 *Allegato:* [Visualizza allegato](${disposizione.allegato_url})` : ""}
 
 🟢 *Disposizione approvata dal Preposto. I magazzinieri possono procedere e caricare le foto relative.*`;
 
-        await telegramClient.sendMessage(TELEGRAM_DISPOSIZIONI_CHANNEL_ID, operaiMessage).catch((err) => {
-          console.error("Errore nell'inoltro della disposizione al canale:", err);
-        });
+          const sendToChannel = async () => {
+            if (disposizione.allegato_url) {
+              const fileLower = (disposizione.allegato_name || "").toLowerCase();
+              const isImage = fileLower.endsWith(".png") || fileLower.endsWith(".jpg") || fileLower.endsWith(".jpeg") || fileLower.endsWith(".gif") || fileLower.endsWith(".webp");
+              
+              if (isImage) {
+                return await telegramClient.sendPhoto(targetChannelId, disposizione.allegato_url, operaiMessage);
+              } else {
+                return await telegramClient.sendDocument(targetChannelId, disposizione.allegato_url, operaiMessage);
+              }
+            } else {
+              return await telegramClient.sendMessage(targetChannelId, operaiMessage);
+            }
+          };
+
+          await sendToChannel().catch((err) => {
+            console.error("Errore nell'inoltro della disposizione al canale:", err);
+          });
+        }
       }
 
       // 3. Rispondi a Telegram confermando l'azione
@@ -216,10 +247,15 @@ Scegli come procedere:`;
       
 *Codice:* \`${disposizione.codice}\`
 *Descrizione:* ${disposizione.descrizione}
+${disposizione.allegato_url ? `\n📎 *Allegato:* [${disposizione.allegato_name || "Visualizza file"}](${disposizione.allegato_url})` : ""}
 
 Stato finale: ${finalEmoji} *${finalAction}* da *${prepostoName}* il ${new Date().toLocaleDateString("it-IT")} alle ${new Date().toLocaleTimeString("it-IT")}.`;
 
-      await telegramClient.editMessageText(chatOfMessageId, messageId, updatedMessageText);
+      if (disposizione.allegato_url) {
+        await telegramClient.editMessageCaption(chatOfMessageId, messageId, updatedMessageText);
+      } else {
+        await telegramClient.editMessageText(chatOfMessageId, messageId, updatedMessageText);
+      }
     }
 
     // ==========================================

@@ -7,11 +7,13 @@
 CREATE TABLE IF NOT EXISTS disposizioni (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
-    codice TEXT UNIQUE NOT NULL,
+    codice TEXT NOT NULL,
     descrizione TEXT NOT NULL,
     stato TEXT NOT NULL DEFAULT 'in_attesa', -- 'in_attesa', 'approvato', 'rifiutato'
     approvato_da TEXT,                       -- Identificativo o nome del Preposto
-    decisione_data TIMESTAMP WITH TIME ZONE
+    decisione_data TIMESTAMP WITH TIME ZONE,
+    allegato_url TEXT,                       -- URL dell'allegato opzionale (es. PDF o foto)
+    allegato_name TEXT                       -- Nome originale del file allegato
 );
 
 -- 2. Tabella Foto Magazzino (Fase 2)
